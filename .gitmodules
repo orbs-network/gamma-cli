@@ -1,0 +1,3 @@
+[submodule "vendor/github.com/orbs-network/orbs-client-sdk-go"]
+	path = vendor/github.com/orbs-network/orbs-client-sdk-go
+	url = https://github.com/orbs-network/orbs-client-sdk-go

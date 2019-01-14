@@ -1,0 +1,10 @@
+{
+  "ContractName": "CounterExample",
+  "MethodName": "add",
+  "Arguments": [
+    {
+      "Type": "uint64",
+      "Value": "25"
+    }
+  ]
+}
