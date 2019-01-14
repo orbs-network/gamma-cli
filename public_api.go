@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/orbs-network/orbs-client-sdk-go/codec"
-	"github.com/orbs-network/orbs-client-sdk-go/gammacli/jsoncodec"
+	"github.com/orbs-network/gamma-cli/jsoncodec"
 	"github.com/orbs-network/orbs-client-sdk-go/orbs"
 	"github.com/pkg/errors"
 	"io/ioutil"

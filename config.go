@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/orbs-network/orbs-client-sdk-go/gammacli/jsoncodec"
+	"github.com/orbs-network/gamma-cli/jsoncodec"
 	"io/ioutil"
 )
 
