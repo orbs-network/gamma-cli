@@ -20,13 +20,13 @@ func UnmarshalArgs(args []*Arg, getTestKeyFromFile func(string) *RawKey) ([]inte
 		case "uint32":
 			val, err := strconv.ParseUint(arg.Value, 10, 32)
 			if err != nil {
-				return nil, errors.Errorf("Value of argument %d should be a string containing the numeric value\n\nCurrent value: '%s'", i, arg.Value)
+				return nil, errors.Errorf("Value of argument %d should be a string containing the numeric value\n\nCurrent value: '%s'", i+1, arg.Value)
 			}
 			res = append(res, uint32(val))
 		case "uint64":
 			val, err := strconv.ParseUint(arg.Value, 10, 64)
 			if err != nil {
-				return nil, errors.Errorf("Value of argument %d should be a string containing the numeric value\n\nCurrent value: '%s'", i, arg.Value)
+				return nil, errors.Errorf("Value of argument %d should be a string containing the numeric value\n\nCurrent value: '%s'", i+1, arg.Value)
 			}
 			res = append(res, uint64(val))
 		case "string":
@@ -34,13 +34,13 @@ func UnmarshalArgs(args []*Arg, getTestKeyFromFile func(string) *RawKey) ([]inte
 		case "bytes":
 			val, err := simpleDecodeHex(arg.Value)
 			if err != nil {
-				return nil, errors.Errorf("Value of argument %d should be a string containing the bytes in hex\nHex decoder returned error: %s\n\nCurrent value: '%s'", i, err.Error(), arg.Value)
+				return nil, errors.Errorf("Value of argument %d should be a string containing the bytes in hex\nHex decoder returned error: %s\n\nCurrent value: '%s'", i+1, err.Error(), arg.Value)
 			}
 			res = append(res, []byte(val))
 		case "gamma:address":
 			val, err := encoding.DecodeHex(arg.Value)
 			if err != nil {
-				return nil, errors.Errorf("Value of argument %d should be a string containing the bytes in hex\nHex decoder returned error: %s\n\nCurrent value: '%s'", i, err.Error(), arg.Value)
+				return nil, errors.Errorf("Value of argument %d should be a string containing the bytes in hex\nHex decoder returned error: %s\n\nCurrent value: '%s'", i+1, err.Error(), arg.Value)
 			}
 			res = append(res, []byte(val))
 		case "gamma:keys-file-address":
@@ -48,7 +48,7 @@ func UnmarshalArgs(args []*Arg, getTestKeyFromFile func(string) *RawKey) ([]inte
 			res = append(res, []byte(key.Address))
 		default:
 			supported := "Supported types are: uint32 uint64 string bytes gamma:keys-file-address"
-			return nil, errors.Errorf("Type of argument %d '%s' is unsupported\n\n%s", i, arg.Type, supported)
+			return nil, errors.Errorf("Type of argument %d '%s' is unsupported\n\n%s", i+1, arg.Type, supported)
 		}
 	}
 	return res, nil
