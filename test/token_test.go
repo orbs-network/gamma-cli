@@ -45,4 +45,9 @@ func TestSimpleTransfer(t *testing.T) {
 	require.NoError(t, err, "get balance should succeed")
 	require.True(t, strings.Contains(out, `"ExecutionResult": "SUCCESS"`))
 	require.True(t, strings.Contains(out, `"Value": "19"`))
+
+	out, err = cli.Run("send-tx", "transfer-direct.json")
+	t.Log(out)
+	require.NoError(t, err, "transfer should succeed")
+	require.True(t, strings.Contains(out, `"ExecutionResult": "SUCCESS"`))
 }

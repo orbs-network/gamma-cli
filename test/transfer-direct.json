@@ -1,0 +1,14 @@
+{
+  "ContractName": "BenchmarkToken",
+  "MethodName": "transfer",
+  "Arguments": [
+    {
+      "Type": "uint64",
+      "Value": "17"
+    },
+    {
+      "Type": "bytes",
+      "Value": "0xb011A26EC85d8B2f9deD3A9062BcbDA4Ed38b778"
+    }
+  ]
+}

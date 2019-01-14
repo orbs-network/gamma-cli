@@ -74,7 +74,7 @@ func MarshalArgs(arguments []interface{}) []*Arg {
 }
 
 func simpleDecodeHex(value string) ([]byte, error) {
-	if strings.HasPrefix("0x", value) {
+	if strings.HasPrefix(value, "0x") {
 		value = value[2:]
 	}
 	return hex.DecodeString(value)
