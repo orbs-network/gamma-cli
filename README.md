@@ -1,5 +1,7 @@
 # Gamma - Personal Orbs Blockchain for Developers 
 
+[![CircleCI](https://circleci.com/gh/orbs-network/gamma-cli.svg?style=svg)](https://circleci.com/gh/orbs-network/gamma-cli)
+
 Gamma is a personal Orbs blockchain that allows developers to easily test, run and deploy smart contracts.
 
 `Gamma server` - runs an in-memory virtual chain on top of an Orbs blockchain with several nodes on your local machine.
