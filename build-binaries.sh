@@ -3,7 +3,7 @@ rm -rf ./_bin
 
 mkdir -p ./_bin
 
-VERSION="v0.6.3"
+VERSION="v0.6.4"
 
 echo "\n\n*** MAC:"
 GOOS=darwin GOARCH=amd64 go build -o _bin/gamma-cli
