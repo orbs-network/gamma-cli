@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const GAMMA_CLI_VERSION = "0.6.4"
+const GAMMA_CLI_VERSION = "0.6.5"
 const CONFIG_FILENAME = "orbs-gamma-config.json"
 const TEST_KEYS_FILENAME = "orbs-test-keys.json"
 const LOCAL_ENV_ID = "local"
