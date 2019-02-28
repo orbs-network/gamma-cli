@@ -170,6 +170,16 @@ See https://orbs.gitbook.io for more info.
 
 &nbsp;
 
+## Advanced debugging
+
+* In order to investigate backend issues in Gamma server itself, gain access to the server logs of the currently running instance by running in terminal:
+ 
+    ```
+    docker logs -f orbs-gamma-server
+    ```
+
+&nbsp;
+
 ## License
 
 MIT
