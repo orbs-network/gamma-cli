@@ -7,3 +7,12 @@
 [submodule "vendor/github.com/stretchr/testify"]
 	path = vendor/github.com/stretchr/testify
 	url = https://github.com/stretchr/testify
+[submodule "vendor/github.com/orbs-network/lean-helix-go"]
+	path = vendor/github.com/orbs-network/lean-helix-go
+	url = https://github.com/orbs-network/lean-helix-go
+[submodule "vendor/github.com/orbs-network/orbs-spec"]
+	path = vendor/github.com/orbs-network/orbs-spec
+	url = https://github.com/orbs-network/orbs-spec
+[submodule "vendor/github.com/orbs-network/membuffers"]
+	path = vendor/github.com/orbs-network/membuffers
+	url = https://github.com/orbs-network/membuffers

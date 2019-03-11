@@ -34,6 +34,8 @@ func TestSimpleTransfer(t *testing.T) {
 	require.True(t, strings.Contains(out, `"RequestStatus": "COMPLETED"`))
 	require.True(t, strings.Contains(out, `"PackedProof": "0x`))
 	require.True(t, strings.Contains(out, `"PackedReceipt": "0x`))
+	require.True(t, strings.Contains(out, `"ProofSigners": [`))
+	require.True(t, strings.Contains(out, `"0xa328846cd5b4979d68a8c58a9bdfeee657b34de7"`))
 
 	out, err = cli.Run("send-tx", "transfer.json", "-arg1", "2")
 	t.Log(out)
