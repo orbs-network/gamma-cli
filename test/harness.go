@@ -18,8 +18,9 @@ var cachedGammaCliBinaryPath string
 var downloadedLatestGammaServer bool
 
 type gammaCli struct {
-	port         string
-	experimental bool
+	port            string
+	experimental    bool
+	configOverrides string
 }
 
 func compileGammaCli() string {
@@ -60,6 +61,10 @@ func (g *gammaCli) Run(args ...string) (string, error) {
 		args = append(args, "-env", g.getGammaEnvironment())
 		pathToConfig := path.Join(os.Getenv("HOME"), ".orbs", CONFIG_FILENAME)
 		args = append(args, "-config", pathToConfig)
+
+		if g.configOverrides != "" {
+			args = append(args, "-override-config", g.configOverrides)
+		}
 	}
 	out, err := exec.Command(compileGammaCli(), args...).CombinedOutput()
 	return string(out), err
@@ -73,6 +78,11 @@ func GammaCliWithPort(port int) *gammaCli {
 	return &gammaCli{
 		port: fmt.Sprintf("%d", port),
 	}
+}
+
+func (g *gammaCli) WithConfigOverrides(override string) *gammaCli {
+	g.configOverrides = override
+	return g
 }
 
 func (g *gammaCli) WithStableServer() *gammaCli {

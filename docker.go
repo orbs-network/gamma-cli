@@ -42,7 +42,7 @@ func commandStartLocal(requiredOptions []string) {
 
 	p := fmt.Sprintf("%d:8080", *flagPort)
 	run := fmt.Sprintf(DOCKER_RUN, gammaVersion)
-	out, err := exec.Command("docker", "run", "-d", "--name", CONTAINER_NAME, "-p", p, run).CombinedOutput()
+	out, err := exec.Command("docker", "run", "-d", "--name", CONTAINER_NAME, "-p", p, run, "./gamma-server", "-override-config", *flagOverrideConfig).CombinedOutput()
 	if err != nil {
 		die("Could not exec 'docker run' command.\n\n%s", out)
 	}

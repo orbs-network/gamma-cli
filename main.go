@@ -26,7 +26,7 @@ type command struct {
 var commands = map[string]*command{
 	"start-local": {
 		desc:            "start a local Orbs personal blockchain instance listening on port",
-		args:            "-port <PORT>",
+		args:            "-port <PORT> -override-config {json}",
 		example:         "gamma-cli start-local -port 8080",
 		handler:         commandStartLocal,
 		sort:            0,
@@ -111,13 +111,14 @@ var commands = map[string]*command{
 }
 
 var (
-	flagPort         = flag.Int("port", 8080, "listening port for Gamma server")
-	flagSigner       = flag.String("signer", "user1", "id of the signing key from the test key json")
-	flagContractName = flag.String("name", "", "name of the smart contract being deployed")
-	flagKeyFile      = flag.String("keys", TEST_KEYS_FILENAME, "name of the json file containing test keys")
-	flagConfigFile   = flag.String("config", CONFIG_FILENAME, "path to config file")
-	flagEnv          = flag.String("env", LOCAL_ENV_ID, "environment from config file containing server connection details")
-	flagWait         = flag.Bool("wait", false, "wait until Gamma server is ready and listening")
+	flagPort           = flag.Int("port", 8080, "listening port for Gamma server")
+	flagOverrideConfig = flag.String("override-config", "{}", "option json for overriding config values, same format as file-based config")
+	flagSigner         = flag.String("signer", "user1", "id of the signing key from the test key json")
+	flagContractName   = flag.String("name", "", "name of the smart contract being deployed")
+	flagKeyFile        = flag.String("keys", TEST_KEYS_FILENAME, "name of the json file containing test keys")
+	flagConfigFile     = flag.String("config", CONFIG_FILENAME, "path to config file")
+	flagEnv            = flag.String("env", LOCAL_ENV_ID, "environment from config file containing server connection details")
+	flagWait           = flag.Bool("wait", false, "wait until Gamma server is ready and listening")
 
 	// args (hidden from help)
 	flagArg1 = flag.String("arg1", "", "")
