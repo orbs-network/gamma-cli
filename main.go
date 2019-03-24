@@ -132,6 +132,9 @@ var (
 	flagArg4 = flag.String("arg4", "", "")
 	flagArg5 = flag.String("arg5", "", "")
 	flagArg6 = flag.String("arg6", "", "")
+	flagArg7 = flag.String("arg7", "", "")
+	flagArg8 = flag.String("arg8", "", "")
+	flagArg9 = flag.String("arg9", "", "")
 )
 
 func main() {

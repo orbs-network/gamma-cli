@@ -8,8 +8,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/orbs-network/orbs-client-sdk-go/codec"
 	"github.com/orbs-network/gamma-cli/jsoncodec"
+	"github.com/orbs-network/orbs-client-sdk-go/codec"
 	"github.com/orbs-network/orbs-client-sdk-go/orbs"
 	"github.com/pkg/errors"
 	"io/ioutil"
@@ -284,5 +284,14 @@ func overrideArgsWithFlags(args []*jsoncodec.Arg) {
 	}
 	if *flagArg6 != "" {
 		args[5].Value = *flagArg6
+	}
+	if *flagArg7 != "" {
+		args[6].Value = *flagArg7
+	}
+	if *flagArg8 != "" {
+		args[7].Value = *flagArg8
+	}
+	if *flagArg9 != "" {
+		args[8].Value = *flagArg9
 	}
 }
