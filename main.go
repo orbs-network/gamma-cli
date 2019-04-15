@@ -19,14 +19,54 @@ const TEST_KEYS_FILENAME = "orbs-test-keys.json"
 const LOCAL_ENV_ID = "local"
 const EXPERIMENTAL_ENV_ID = "experimental"
 
+type handlerOptions struct {
+	dockerRepo string
+	dockerRun string
+	containerName string
+	dockerRegistryTagsUrl string
+	port int
+	containerPort int
+}
+
+type handler func([]string)
+type unboundHandler func(handlerOptions, []string)
+
+func bindHandler(hOptions handlerOptions, uHandler unboundHandler) handler {
+	return func(params []string) {
+		uHandler(hOptions, params)
+	}
+}
+
 type command struct {
 	desc            string
 	args            string
 	example         string
 	example2        string
-	handler         func([]string)
+	handler
 	sort            int
 	requiredOptions []string
+}
+
+func gammaHandlerOptions() handlerOptions {
+	return handlerOptions{
+		dockerRepo:            "orbsnetwork/gamma",
+		dockerRun:             "orbsnetwork/gamma:%s",
+		containerName:         "orbs-gamma-server",
+		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/gamma/tags/",
+		port: *flagPort,
+		containerPort: 8080,
+	}
+}
+
+func prismHandlerOptions() handlerOptions {
+	return handlerOptions{
+		dockerRepo:            "orbsnetwork/prism",
+		dockerRun:             "orbsnetwork/prism:%s",
+		containerName:         "orbs-prism",
+		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/prism/tags/",
+		port: *prismPort,
+		containerPort: 3000,
+	}
 }
 
 var commands = map[string]*command{
@@ -34,13 +74,13 @@ var commands = map[string]*command{
 		desc:            "start a local Orbs personal blockchain instance listening on port",
 		args:            "-port <PORT>",
 		example:         "gamma-cli start-local -port 8080",
-		handler:         commandStartLocal,
+		handler:         bindHandler(gammaHandlerOptions(), commandStartLocal),
 		sort:            0,
 		requiredOptions: nil,
 	},
 	"stop-local": {
 		desc:            "stop a locally running Orbs personal blockchain instance",
-		handler:         commandStopLocal,
+		handler:         bindHandler(gammaHandlerOptions(), commandStopLocal),
 		sort:            1,
 		requiredOptions: nil,
 	},
@@ -99,13 +139,13 @@ var commands = map[string]*command{
 		desc:            "upgrade to the latest stable version of Gamma server",
 		example:         "gamma-cli upgrade-server",
 		example2:        "gamma-cli upgrade-server -env experimental",
-		handler:         commandUpgradeServer,
+		handler:         bindHandler(gammaHandlerOptions(), commandUpgradeServer),
 		sort:            8,
 		requiredOptions: nil,
 	},
 	"version": {
 		desc:            "print gamma-cli and Gamma server versions",
-		handler:         commandVersion,
+		handler:         bindHandler(gammaHandlerOptions(), commandVersion),
 		sort:            9,
 		requiredOptions: nil,
 	},
@@ -118,6 +158,7 @@ var commands = map[string]*command{
 
 var (
 	flagPort         = flag.Int("port", 8080, "listening port for Gamma server")
+	prismPort         = flag.Int("prismPort", 3000, "listening port for Prism blockchain inspector")
 	flagSigner       = flag.String("signer", "user1", "id of the signing key from the test key json")
 	flagContractName = flag.String("name", "", "name of the smart contract being deployed")
 	flagKeyFile      = flag.String("keys", TEST_KEYS_FILENAME, "name of the json file containing test keys")

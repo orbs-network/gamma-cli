@@ -20,21 +20,17 @@ import (
 	"strings"
 )
 
-const DOCKER_REPO = "orbsnetwork/gamma"
-const DOCKER_RUN = "orbsnetwork/gamma:%s"
-const CONTAINER_NAME = "orbs-gamma-server"
-const DOCKER_REGISTRY_TAGS_URL = "https://registry.hub.docker.com/v2/repositories/orbsnetwork/gamma/tags/"
 const DOCKER_TAG_NOT_FOUND = "not found"
 const DOCKER_TAG_EXPERIMENTAL = "experimental"
 
-func commandStartLocal(requiredOptions []string) {
-	gammaVersion := verifyDockerInstalled()
+func commandStartLocal(dockerOptions handlerOptions, requiredOptions []string) {
+	gammaVersion := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 
 	if !doesFileExist(*flagKeyFile) {
 		commandGenerateTestKeys(nil)
 	}
 
-	if isDockerGammaRunning() {
+	if isDockerGammaRunning(dockerOptions.containerName) {
 		log(`
 *********************************************************************************
               Orbs Gamma personal blockchain is already running!
@@ -46,14 +42,14 @@ func commandStartLocal(requiredOptions []string) {
 		exit()
 	}
 
-	p := fmt.Sprintf("%d:8080", *flagPort)
-	run := fmt.Sprintf(DOCKER_RUN, gammaVersion)
-	out, err := exec.Command("docker", "run", "-d", "--name", CONTAINER_NAME, "-p", p, run).CombinedOutput()
+	p := fmt.Sprintf("%d:%d", dockerOptions.port, dockerOptions.containerPort)
+	run := fmt.Sprintf(dockerOptions.dockerRun, gammaVersion)
+	out, err := exec.Command("docker", "run", "-d", "--name", dockerOptions.containerName, "-p", p, run).CombinedOutput()
 	if err != nil {
 		die("Could not exec 'docker run' command.\n\n%s", out)
 	}
 
-	if !isDockerGammaRunning() {
+	if !isDockerGammaRunning(dockerOptions.containerName) {
 		die("Could not run docker image.")
 	}
 
@@ -69,24 +65,24 @@ func commandStartLocal(requiredOptions []string) {
   Run 'gamma-cli help' in terminal to learn how to interact with this instance.
               
 **********************************************************************************
-`, gammaVersion, *flagPort)
+`, gammaVersion, dockerOptions.port)
 }
 
-func commandStopLocal(requiredOptions []string) {
-	verifyDockerInstalled()
+func commandStopLocal(dockerOptions handlerOptions, requiredOptions []string) {
+	verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 
-	out, err := exec.Command("docker", "stop", CONTAINER_NAME).CombinedOutput()
+	out, err := exec.Command("docker", "stop", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
 		log("Gamma server is already stopped.\n")
 		exit()
 	}
 
-	out, err = exec.Command("docker", "rm", "-f", CONTAINER_NAME).CombinedOutput()
+	out, err = exec.Command("docker", "rm", "-f", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
 		die("Could not remove docker container.\n\n%s", out)
 	}
 
-	if isDockerGammaRunning() {
+	if isDockerGammaRunning(dockerOptions.containerName) {
 		die("Could not stop docker container.")
 	}
 
@@ -101,9 +97,9 @@ func commandStopLocal(requiredOptions []string) {
 `)
 }
 
-func commandUpgradeServer(requiredOptions []string) {
-	currentTag := verifyDockerInstalled()
-	latestTag := getLatestDockerTag()
+func commandUpgradeServer(dockerOptions handlerOptions, requiredOptions []string) {
+	currentTag := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+	latestTag := getLatestDockerTag(dockerOptions.dockerRegistryTagsUrl)
 
 	if !isExperimental() && cmpTags(latestTag, currentTag) <= 0 {
 		log("Current Gamma server stable version %s does not require upgrade.\n", currentTag)
@@ -111,15 +107,15 @@ func commandUpgradeServer(requiredOptions []string) {
 	}
 
 	log("Downloading latest version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", DOCKER_REPO, latestTag))
+	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 	log("")
 }
 
-func verifyDockerInstalled() string {
-	out, err := exec.Command("docker", "images", DOCKER_REPO).CombinedOutput()
+func verifyDockerInstalled(dockerRepo string, dockerRegistryTagUrl string) string {
+	out, err := exec.Command("docker", "images", dockerRepo).CombinedOutput()
 	if err != nil {
 		if runtime.GOOS == "darwin" {
 			die("Docker is required but not running. Is it installed on your machine?\n\nInstall from:  https://docs.docker.com/docker-for-mac/install/")
@@ -128,39 +124,39 @@ func verifyDockerInstalled() string {
 		}
 	}
 
-	existingTag := extractTagFromDockerImagesOutput(string(out))
+	existingTag := extractTagFromDockerImagesOutput(dockerRepo, string(out))
 	if existingTag != DOCKER_TAG_NOT_FOUND {
 		return existingTag
 	}
 
-	latestTag := getLatestDockerTag()
+	latestTag := getLatestDockerTag(dockerRegistryTagUrl)
 
 	log("Orbs personal blockchain docker image is not installed, downloading version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", DOCKER_REPO, latestTag))
+	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerRepo, latestTag))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 	log("")
 
-	out, err = exec.Command("docker", "images", DOCKER_REPO).CombinedOutput()
+	out, err = exec.Command("docker", "images", dockerRepo).CombinedOutput()
 	if err != nil || strings.Count(string(out), "\n") == 1 {
 		die("Could not download docker image.")
 	}
-	return extractTagFromDockerImagesOutput(string(out))
+	return extractTagFromDockerImagesOutput(dockerRepo, string(out))
 }
 
-func isDockerGammaRunning() bool {
-	out, err := exec.Command("docker", "ps", "-f", fmt.Sprintf("name=%s", CONTAINER_NAME)).CombinedOutput()
+func isDockerGammaRunning(containerName string) bool {
+	out, err := exec.Command("docker", "ps", "-f", fmt.Sprintf("name=%s", containerName)).CombinedOutput()
 	if err != nil {
 		return false
 	}
 	return strings.Count(string(out), "\n") > 1
 }
 
-func extractTagFromDockerImagesOutput(out string) string {
-	pattern := fmt.Sprintf(`%s\s+(v\S+)`, regexp.QuoteMeta(DOCKER_REPO))
+func extractTagFromDockerImagesOutput(dockerRepo string, out string) string {
+	pattern := fmt.Sprintf(`%s\s+(v\S+)`, regexp.QuoteMeta(dockerRepo))
 	if isExperimental() {
-		pattern = fmt.Sprintf(`%s\s+(%s)`, regexp.QuoteMeta(DOCKER_REPO), regexp.QuoteMeta(DOCKER_TAG_EXPERIMENTAL))
+		pattern = fmt.Sprintf(`%s\s+(%s)`, regexp.QuoteMeta(dockerRepo), regexp.QuoteMeta(DOCKER_TAG_EXPERIMENTAL))
 	}
 	re := regexp.MustCompile(pattern)
 	res := re.FindStringSubmatch(out)
@@ -170,11 +166,11 @@ func extractTagFromDockerImagesOutput(out string) string {
 	return res[1]
 }
 
-func getLatestDockerTag() string {
+func getLatestDockerTag(dockerRegistryTagsUrl string) string {
 	if isExperimental() {
 		return DOCKER_TAG_EXPERIMENTAL
 	}
-	resp, err := http.Get(DOCKER_REGISTRY_TAGS_URL)
+	resp, err := http.Get(dockerRegistryTagsUrl)
 	if err != nil {
 		die("Cannot connect to docker registry to get image list.")
 	}

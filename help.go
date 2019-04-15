@@ -47,10 +47,10 @@ func commandShowHelp(requiredOptions []string) {
 	os.Exit(2)
 }
 
-func commandVersion(requiredOptions []string) {
+func commandVersion(dockerOptions handlerOptions, requiredOptions []string) {
 	log("gamma-cli version v%s", GAMMA_CLI_VERSION)
 
-	gammaVersion := verifyDockerInstalled()
+	gammaVersion := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 	log("Gamma server version %s (docker)", gammaVersion)
 }
 
