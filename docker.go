@@ -65,7 +65,7 @@ func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []
 	}
 
 	p := fmt.Sprintf("%d:%d", dockerOptions.port, dockerOptions.containerPort)
-	run := fmt.Sprintf(dockerOptions.dockerRun, version)
+	run := fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, version)
 	args := []string {
 		"run", "-d",
 		"--name", dockerOptions.containerName,
@@ -75,7 +75,8 @@ func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []
 	for _, value := range dockerOptions.env {
 		args = append(args, "-e", value)
 	}
-	args = append(args, run, "./gamma-server", "-override-config", *flagOverrideConfig)
+	args = append(args, run)
+	args = append(args, dockerOptions.dockerCmd...)
 
 	out, err := exec.Command("docker",  args...).CombinedOutput()
 	if err != nil {

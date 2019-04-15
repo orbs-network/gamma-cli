@@ -23,7 +23,7 @@ type handlerOptions struct {
 	name string
 
 	dockerRepo string
-	dockerRun string
+	dockerCmd []string
 	containerName string
 	dockerRegistryTagsUrl string
 
@@ -49,7 +49,7 @@ func gammaHandlerOptions() handlerOptions {
 	return handlerOptions{
 		name: "Orbs Gamma personal blockchain",
 		dockerRepo:            "orbsnetwork/gamma",
-		dockerRun:             "orbsnetwork/gamma:%s",
+		dockerCmd: []string{"./gamma-server", "-override-config", *flagOverrideConfig},
 		containerName:         "orbs-gamma-server",
 		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/gamma/tags/",
 		port: *flagPort,
@@ -61,7 +61,6 @@ func prismHandlerOptions() handlerOptions {
 	return handlerOptions{
 		name: "Prism blockchain explorer",
 		dockerRepo:            "orbsnetwork/prism",
-		dockerRun:             "orbsnetwork/prism:%s",
 		containerName:         "orbs-prism",
 		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/prism/tags/",
 		port: *flagPrismPort,
