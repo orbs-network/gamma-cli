@@ -79,7 +79,7 @@ func prismHandlerOptions() handlerOptions {
 var commands = map[string]*command{
 	"start-local": {
 		desc:            "start a local Orbs personal blockchain instance listening on port",
-		args:            "-port <PORT>",
+		args:            "-port <PORT> -override-config {json}",
 		example:         "gamma-cli start-local -port 8080",
 		handler:         commandStartLocal,
 		sort:            0,
@@ -173,6 +173,7 @@ var (
 	flagEnv          = flag.String("env", LOCAL_ENV_ID, "environment from config file containing server connection details")
 	flagWait         = flag.Bool("wait", false, "wait until Gamma server is ready and listening")
 	flagNoUi         = flag.Bool("no-ui", false, "do not start Prism blockchain explorer")
+	flagOverrideConfig = flag.String("override-config", "{}", "option json for overriding config values, same format as file-based config")
 
 	// args (hidden from help)
 	flagArg1 = flag.String("arg1", "", "")
