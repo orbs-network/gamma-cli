@@ -43,5 +43,5 @@ func TestUpgradeExperimentalServer(t *testing.T) {
 	out, err = cli.Run("start-local")
 	t.Log(out)
 	require.NoError(t, err, "start Gamma server should succeed")
-	require.True(t, strings.Contains(out, `Orbs Gamma experimental personal blockchain`), "started Gamma server should not be experimental")
+	require.True(t, strings.Contains(out, `Orbs Gamma personal blockchain experimental`), "started Gamma server should not be experimental")
 }

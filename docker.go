@@ -23,8 +23,26 @@ import (
 const DOCKER_TAG_NOT_FOUND = "not found"
 const DOCKER_TAG_EXPERIMENTAL = "experimental"
 
-func commandStartLocal(dockerOptions handlerOptions, requiredOptions []string) {
-	gammaVersion := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+func commandStartLocal(requiredOptions []string) {
+	commandStartLocalContainer(gammaHandlerOptions(), requiredOptions)
+
+	if prismEnabled() {
+		commandStartLocalContainer(prismHandlerOptions(), requiredOptions)
+	}
+}
+
+func commandStopLocal(requiredOptions []string) {
+	commandStopLocalContainer(gammaHandlerOptions(), requiredOptions)
+	commandStopLocalContainer(prismHandlerOptions(), requiredOptions)
+}
+
+func commandUpgrade(requiredOptions []string) {
+	commandUpgradeImage(gammaHandlerOptions(), requiredOptions)
+	commandUpgradeImage(prismHandlerOptions(), requiredOptions)
+}
+
+func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
+	version := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 
 	if !doesFileExist(*flagKeyFile) {
 		commandGenerateTestKeys(nil)
@@ -33,18 +51,33 @@ func commandStartLocal(dockerOptions handlerOptions, requiredOptions []string) {
 	if isDockerGammaRunning(dockerOptions.containerName) {
 		log(`
 *********************************************************************************
-              Orbs Gamma personal blockchain is already running!
+              %s is already running!
 
   Run 'gamma-cli help' in terminal to learn how to interact with this instance.
               
 **********************************************************************************
-`)
+`, dockerOptions.name)
 		exit()
 	}
 
+	if err := createDockerNetwork(); err != nil {
+		die("could not create docker network gamma: %s", err)
+	}
+
 	p := fmt.Sprintf("%d:%d", dockerOptions.port, dockerOptions.containerPort)
-	run := fmt.Sprintf(dockerOptions.dockerRun, gammaVersion)
-	out, err := exec.Command("docker", "run", "-d", "--name", dockerOptions.containerName, "-p", p, run).CombinedOutput()
+	run := fmt.Sprintf(dockerOptions.dockerRun, version)
+	args := []string {
+		"run", "-d",
+		"--name", dockerOptions.containerName,
+		"-p", p,
+		"--network", "gamma",
+	}
+	for _, value := range dockerOptions.env {
+		args = append(args, "-e", value)
+	}
+	args = append(args, run)
+
+	out, err := exec.Command("docker",  args...).CombinedOutput()
 	if err != nil {
 		die("Could not exec 'docker run' command.\n\n%s", out)
 	}
@@ -59,21 +92,21 @@ func commandStartLocal(dockerOptions handlerOptions, requiredOptions []string) {
 
 	log(`
 *********************************************************************************
-                 Orbs Gamma %s personal blockchain is running!
+                 %s %s is running!
 
   Local blockchain instance started and listening on port %d.
   Run 'gamma-cli help' in terminal to learn how to interact with this instance.
               
 **********************************************************************************
-`, gammaVersion, dockerOptions.port)
+`, dockerOptions.name, version, dockerOptions.port)
 }
 
-func commandStopLocal(dockerOptions handlerOptions, requiredOptions []string) {
+func commandStopLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
 	verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 
 	out, err := exec.Command("docker", "stop", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
-		log("Gamma server is already stopped.\n")
+		log("%s server is already stopped.\n", dockerOptions.name)
 		exit()
 	}
 
@@ -88,21 +121,21 @@ func commandStopLocal(dockerOptions handlerOptions, requiredOptions []string) {
 
 	log(`
 *********************************************************************************
-                    Orbs Gamma personal blockchain stopped.
+                    %s stopped.
 
   A local blockchain instance is running in-memory.
   The next time you start the instance, all contracts and state will disappear. 
               
 **********************************************************************************
-`)
+`, dockerOptions.name)
 }
 
-func commandUpgradeServer(dockerOptions handlerOptions, requiredOptions []string) {
+func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string) {
 	currentTag := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 	latestTag := getLatestDockerTag(dockerOptions.dockerRegistryTagsUrl)
 
 	if !isExperimental() && cmpTags(latestTag, currentTag) <= 0 {
-		log("Current Gamma server stable version %s does not require upgrade.\n", currentTag)
+		log("Current %s stable version %s does not require upgrade.\n", dockerOptions.name, currentTag)
 		exit()
 	}
 
@@ -248,4 +281,24 @@ func atoi(num string) int {
 		return 0
 	}
 	return res
+}
+
+func createDockerNetwork() error {
+	out, err := exec.Command("docker", "network", "ls", "--filter", "name=gamma", "-q").CombinedOutput()
+	if err != nil {
+		return err
+	}
+
+	if len(out) == 0 {
+		_, err := exec.Command("docker", "network", "create", "gamma").CombinedOutput()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func prismEnabled() bool {
+	return !*flagNoUi
 }

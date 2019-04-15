@@ -47,11 +47,14 @@ func commandShowHelp(requiredOptions []string) {
 	os.Exit(2)
 }
 
-func commandVersion(dockerOptions handlerOptions, requiredOptions []string) {
+func commandVersion(requiredOptions []string) {
 	log("gamma-cli version v%s", GAMMA_CLI_VERSION)
 
-	gammaVersion := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+	gammaVersion := verifyDockerInstalled(gammaHandlerOptions().dockerRepo, gammaHandlerOptions().dockerRegistryTagsUrl)
 	log("Gamma server version %s (docker)", gammaVersion)
+
+	prismVersion := verifyDockerInstalled(prismHandlerOptions().dockerRepo, prismHandlerOptions().dockerRegistryTagsUrl)
+	log("Prism blockchain explorer version %s (docker)", prismVersion)
 }
 
 func sortCommands() []string {

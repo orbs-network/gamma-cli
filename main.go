@@ -20,22 +20,20 @@ const LOCAL_ENV_ID = "local"
 const EXPERIMENTAL_ENV_ID = "experimental"
 
 type handlerOptions struct {
+	name string
+
 	dockerRepo string
 	dockerRun string
 	containerName string
 	dockerRegistryTagsUrl string
+
+	env []string
+
 	port int
 	containerPort int
 }
 
 type handler func([]string)
-type unboundHandler func(handlerOptions, []string)
-
-func bindHandler(hOptions handlerOptions, uHandler unboundHandler) handler {
-	return func(params []string) {
-		uHandler(hOptions, params)
-	}
-}
 
 type command struct {
 	desc            string
@@ -49,6 +47,7 @@ type command struct {
 
 func gammaHandlerOptions() handlerOptions {
 	return handlerOptions{
+		name: "Orbs Gamma personal blockchain",
 		dockerRepo:            "orbsnetwork/gamma",
 		dockerRun:             "orbsnetwork/gamma:%s",
 		containerName:         "orbs-gamma-server",
@@ -60,12 +59,20 @@ func gammaHandlerOptions() handlerOptions {
 
 func prismHandlerOptions() handlerOptions {
 	return handlerOptions{
+		name: "Prism blockchain explorer",
 		dockerRepo:            "orbsnetwork/prism",
 		dockerRun:             "orbsnetwork/prism:%s",
 		containerName:         "orbs-prism",
 		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/prism/tags/",
-		port: *prismPort,
+		port: *flagPrismPort,
 		containerPort: 3000,
+		env: []string{
+			"ORBS_VIRTUAL_CHAIN_ID=42",
+			"NODE_ENV=staging",
+			"DATABASE_TYPE=inmemory",
+			"GAP_FILLER_ACTIVE=true",
+			fmt.Sprintf("ORBS_ENDPOINT=http://orbs-gamma-server:8080"),
+		},
 	}
 }
 
@@ -74,13 +81,13 @@ var commands = map[string]*command{
 		desc:            "start a local Orbs personal blockchain instance listening on port",
 		args:            "-port <PORT>",
 		example:         "gamma-cli start-local -port 8080",
-		handler:         bindHandler(gammaHandlerOptions(), commandStartLocal),
+		handler:         commandStartLocal,
 		sort:            0,
 		requiredOptions: nil,
 	},
 	"stop-local": {
 		desc:            "stop a locally running Orbs personal blockchain instance",
-		handler:         bindHandler(gammaHandlerOptions(), commandStopLocal),
+		handler:         commandStopLocal,
 		sort:            1,
 		requiredOptions: nil,
 	},
@@ -139,13 +146,13 @@ var commands = map[string]*command{
 		desc:            "upgrade to the latest stable version of Gamma server",
 		example:         "gamma-cli upgrade-server",
 		example2:        "gamma-cli upgrade-server -env experimental",
-		handler:         bindHandler(gammaHandlerOptions(), commandUpgradeServer),
+		handler:         commandUpgrade,
 		sort:            8,
 		requiredOptions: nil,
 	},
 	"version": {
 		desc:            "print gamma-cli and Gamma server versions",
-		handler:         bindHandler(gammaHandlerOptions(), commandVersion),
+		handler:         commandVersion,
 		sort:            9,
 		requiredOptions: nil,
 	},
@@ -158,13 +165,14 @@ var commands = map[string]*command{
 
 var (
 	flagPort         = flag.Int("port", 8080, "listening port for Gamma server")
-	prismPort         = flag.Int("prismPort", 3000, "listening port for Prism blockchain inspector")
+	flagPrismPort    = flag.Int("prismPort", 3000, "listening port for Prism blockchain explorer")
 	flagSigner       = flag.String("signer", "user1", "id of the signing key from the test key json")
 	flagContractName = flag.String("name", "", "name of the smart contract being deployed")
 	flagKeyFile      = flag.String("keys", TEST_KEYS_FILENAME, "name of the json file containing test keys")
 	flagConfigFile   = flag.String("config", CONFIG_FILENAME, "path to config file")
 	flagEnv          = flag.String("env", LOCAL_ENV_ID, "environment from config file containing server connection details")
 	flagWait         = flag.Bool("wait", false, "wait until Gamma server is ready and listening")
+	flagNoUi         = flag.Bool("no-ui", false, "do not start Prism blockchain explorer")
 
 	// args (hidden from help)
 	flagArg1 = flag.String("arg1", "", "")
