@@ -50,8 +50,11 @@ func commandShowHelp(requiredOptions []string) {
 func commandVersion(requiredOptions []string) {
 	log("gamma-cli version v%s", GAMMA_CLI_VERSION)
 
-	gammaVersion := verifyDockerInstalled()
+	gammaVersion := verifyDockerInstalled(gammaHandlerOptions().dockerRepo, gammaHandlerOptions().dockerRegistryTagsUrl)
 	log("Gamma server version %s (docker)", gammaVersion)
+
+	prismVersion := verifyDockerInstalled(prismHandlerOptions().dockerRepo, prismHandlerOptions().dockerRegistryTagsUrl)
+	log("Prism blockchain explorer version %s (docker)", prismVersion)
 }
 
 func sortCommands() []string {

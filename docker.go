@@ -20,40 +20,70 @@ import (
 	"strings"
 )
 
-const DOCKER_REPO = "orbsnetwork/gamma"
-const DOCKER_RUN = "orbsnetwork/gamma:%s"
-const CONTAINER_NAME = "orbs-gamma-server"
-const DOCKER_REGISTRY_TAGS_URL = "https://registry.hub.docker.com/v2/repositories/orbsnetwork/gamma/tags/"
 const DOCKER_TAG_NOT_FOUND = "not found"
 const DOCKER_TAG_EXPERIMENTAL = "experimental"
 
 func commandStartLocal(requiredOptions []string) {
-	gammaVersion := verifyDockerInstalled()
+	commandStartLocalContainer(gammaHandlerOptions(), requiredOptions)
+
+	if prismEnabled() {
+		commandStartLocalContainer(prismHandlerOptions(), requiredOptions)
+	}
+}
+
+func commandStopLocal(requiredOptions []string) {
+	commandStopLocalContainer(gammaHandlerOptions(), requiredOptions)
+	commandStopLocalContainer(prismHandlerOptions(), requiredOptions)
+}
+
+func commandUpgrade(requiredOptions []string) {
+	commandUpgradeImage(gammaHandlerOptions(), requiredOptions)
+	commandUpgradeImage(prismHandlerOptions(), requiredOptions)
+}
+
+func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
+	version := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 
 	if !doesFileExist(*flagKeyFile) {
 		commandGenerateTestKeys(nil)
 	}
 
-	if isDockerGammaRunning() {
+	if isDockerGammaRunning(dockerOptions.containerName) {
 		log(`
 *********************************************************************************
-              Orbs Gamma personal blockchain is already running!
+              %s is already running!
 
   Run 'gamma-cli help' in terminal to learn how to interact with this instance.
               
 **********************************************************************************
-`)
+`, dockerOptions.name)
 		exit()
 	}
 
-	p := fmt.Sprintf("%d:8080", *flagPort)
-	run := fmt.Sprintf(DOCKER_RUN, gammaVersion)
-	out, err := exec.Command("docker", "run", "-d", "--name", CONTAINER_NAME, "-p", p, run, "./gamma-server", "-override-config", *flagOverrideConfig).CombinedOutput()
+	if err := createDockerNetwork(); err != nil {
+		die("could not create docker network gamma: %s", err)
+	}
+
+	p := fmt.Sprintf("%d:%d", dockerOptions.port, dockerOptions.containerPort)
+	run := fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, version)
+	args := []string {
+		"run", "-d",
+		"--name", dockerOptions.containerName,
+		"-p", p,
+		"--network", "gamma",
+	}
+	for _, value := range dockerOptions.env {
+		args = append(args, "-e", value)
+	}
+	args = append(args, run)
+	args = append(args, dockerOptions.dockerCmd...)
+
+	out, err := exec.Command("docker",  args...).CombinedOutput()
 	if err != nil {
 		die("Could not exec 'docker run' command.\n\n%s", out)
 	}
 
-	if !isDockerGammaRunning() {
+	if !isDockerGammaRunning(dockerOptions.containerName) {
 		die("Could not run docker image.")
 	}
 
@@ -63,63 +93,63 @@ func commandStartLocal(requiredOptions []string) {
 
 	log(`
 *********************************************************************************
-                 Orbs Gamma %s personal blockchain is running!
+                 %s %s is running!
 
   Local blockchain instance started and listening on port %d.
   Run 'gamma-cli help' in terminal to learn how to interact with this instance.
               
 **********************************************************************************
-`, gammaVersion, *flagPort)
+`, dockerOptions.name, version, dockerOptions.port)
 }
 
-func commandStopLocal(requiredOptions []string) {
-	verifyDockerInstalled()
+func commandStopLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
+	verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
 
-	out, err := exec.Command("docker", "stop", CONTAINER_NAME).CombinedOutput()
+	out, err := exec.Command("docker", "stop", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
-		log("Gamma server is already stopped.\n")
+		log("%s server is already stopped.\n", dockerOptions.name)
 		exit()
 	}
 
-	out, err = exec.Command("docker", "rm", "-f", CONTAINER_NAME).CombinedOutput()
+	out, err = exec.Command("docker", "rm", "-f", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
 		die("Could not remove docker container.\n\n%s", out)
 	}
 
-	if isDockerGammaRunning() {
+	if isDockerGammaRunning(dockerOptions.containerName) {
 		die("Could not stop docker container.")
 	}
 
 	log(`
 *********************************************************************************
-                    Orbs Gamma personal blockchain stopped.
+                    %s stopped.
 
   A local blockchain instance is running in-memory.
   The next time you start the instance, all contracts and state will disappear. 
               
 **********************************************************************************
-`)
+`, dockerOptions.name)
 }
 
-func commandUpgradeServer(requiredOptions []string) {
-	currentTag := verifyDockerInstalled()
-	latestTag := getLatestDockerTag()
+func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string) {
+	currentTag := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+	latestTag := getLatestDockerTag(dockerOptions.dockerRegistryTagsUrl)
 
 	if !isExperimental() && cmpTags(latestTag, currentTag) <= 0 {
-		log("Current Gamma server stable version %s does not require upgrade.\n", currentTag)
+		log("Current %s stable version %s does not require upgrade.\n", dockerOptions.name, currentTag)
 		exit()
 	}
 
 	log("Downloading latest version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", DOCKER_REPO, latestTag))
+	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 	log("")
 }
 
-func verifyDockerInstalled() string {
-	out, err := exec.Command("docker", "images", DOCKER_REPO).CombinedOutput()
+func verifyDockerInstalled(dockerRepo string, dockerRegistryTagUrl string) string {
+	out, err := exec.Command("docker", "images", dockerRepo).CombinedOutput()
 	if err != nil {
 		if runtime.GOOS == "darwin" {
 			die("Docker is required but not running. Is it installed on your machine?\n\nInstall from:  https://docs.docker.com/docker-for-mac/install/")
@@ -128,39 +158,39 @@ func verifyDockerInstalled() string {
 		}
 	}
 
-	existingTag := extractTagFromDockerImagesOutput(string(out))
+	existingTag := extractTagFromDockerImagesOutput(dockerRepo, string(out))
 	if existingTag != DOCKER_TAG_NOT_FOUND {
 		return existingTag
 	}
 
-	latestTag := getLatestDockerTag()
+	latestTag := getLatestDockerTag(dockerRegistryTagUrl)
 
 	log("Orbs personal blockchain docker image is not installed, downloading version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", DOCKER_REPO, latestTag))
+	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerRepo, latestTag))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 	log("")
 
-	out, err = exec.Command("docker", "images", DOCKER_REPO).CombinedOutput()
+	out, err = exec.Command("docker", "images", dockerRepo).CombinedOutput()
 	if err != nil || strings.Count(string(out), "\n") == 1 {
 		die("Could not download docker image.")
 	}
-	return extractTagFromDockerImagesOutput(string(out))
+	return extractTagFromDockerImagesOutput(dockerRepo, string(out))
 }
 
-func isDockerGammaRunning() bool {
-	out, err := exec.Command("docker", "ps", "-f", fmt.Sprintf("name=%s", CONTAINER_NAME)).CombinedOutput()
+func isDockerGammaRunning(containerName string) bool {
+	out, err := exec.Command("docker", "ps", "-f", fmt.Sprintf("name=%s", containerName)).CombinedOutput()
 	if err != nil {
 		return false
 	}
 	return strings.Count(string(out), "\n") > 1
 }
 
-func extractTagFromDockerImagesOutput(out string) string {
-	pattern := fmt.Sprintf(`%s\s+(v\S+)`, regexp.QuoteMeta(DOCKER_REPO))
+func extractTagFromDockerImagesOutput(dockerRepo string, out string) string {
+	pattern := fmt.Sprintf(`%s\s+(v\S+)`, regexp.QuoteMeta(dockerRepo))
 	if isExperimental() {
-		pattern = fmt.Sprintf(`%s\s+(%s)`, regexp.QuoteMeta(DOCKER_REPO), regexp.QuoteMeta(DOCKER_TAG_EXPERIMENTAL))
+		pattern = fmt.Sprintf(`%s\s+(%s)`, regexp.QuoteMeta(dockerRepo), regexp.QuoteMeta(DOCKER_TAG_EXPERIMENTAL))
 	}
 	re := regexp.MustCompile(pattern)
 	res := re.FindStringSubmatch(out)
@@ -170,11 +200,11 @@ func extractTagFromDockerImagesOutput(out string) string {
 	return res[1]
 }
 
-func getLatestDockerTag() string {
+func getLatestDockerTag(dockerRegistryTagsUrl string) string {
 	if isExperimental() {
 		return DOCKER_TAG_EXPERIMENTAL
 	}
-	resp, err := http.Get(DOCKER_REGISTRY_TAGS_URL)
+	resp, err := http.Get(dockerRegistryTagsUrl)
 	if err != nil {
 		die("Cannot connect to docker registry to get image list.")
 	}
@@ -252,4 +282,24 @@ func atoi(num string) int {
 		return 0
 	}
 	return res
+}
+
+func createDockerNetwork() error {
+	out, err := exec.Command("docker", "network", "ls", "--filter", "name=gamma", "-q").CombinedOutput()
+	if err != nil {
+		return err
+	}
+
+	if len(out) == 0 {
+		_, err := exec.Command("docker", "network", "create", "gamma").CombinedOutput()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func prismEnabled() bool {
+	return !*flagNoUi
 }
