@@ -136,16 +136,15 @@ func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string)
 	latestTag := getLatestDockerTag(dockerOptions.dockerRegistryTagsUrl)
 
 	if !isExperimental() && cmpTags(latestTag, currentTag) <= 0 {
-		log("Current %s stable version %s does not require upgrade.\n", dockerOptions.name, currentTag)
-		exit()
+		log("Current %s stable version %s does not require upgrade.", dockerOptions.name, currentTag)
+	} else {
+		log("Downloading latest version %s:\n", latestTag)
+		cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+		log("")
 	}
-
-	log("Downloading latest version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
-	log("")
 }
 
 func verifyDockerInstalled(dockerRepo string, dockerRegistryTagUrl string) string {
