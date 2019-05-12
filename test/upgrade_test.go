@@ -24,6 +24,8 @@ func TestUpgradeStableServer(t *testing.T) {
 	t.Log(out)
 	require.NoError(t, err, "upgrade server stable should succeed")
 	require.True(t, strings.Contains(out, `does not require upgrade`), "upgrade same tag should not try to pull fresh copy")
+	require.True(t, strings.Contains(out, `Current Orbs Gamma`), "upgrade worked on gamma-server")
+	require.True(t, strings.Contains(out, `Current Prism`), "upgrade worked on prism")
 }
 
 func TestUpgradeExperimentalServer(t *testing.T) {
@@ -38,10 +40,12 @@ func TestUpgradeExperimentalServer(t *testing.T) {
 	out, err = cli.Run("upgrade-server")
 	t.Log(out)
 	require.NoError(t, err, "upgrade server experimental should succeed")
-	require.True(t, strings.Contains(out, `experimental: Pulling from orbsnetwork/gamma`), "experimental upgrade should always try to pull fresh copy")
+	require.True(t, strings.Contains(out, `experimental: Pulling from orbsnetwork/gamma`), "experimental upgrade should always try to pull fresh copy (gamma)")
+	require.True(t, strings.Contains(out, `experimental: Pulling from orbsnetwork/prism`), "experimental upgrade should always try to pull fresh copy (prism)")
 
 	out, err = cli.Run("start-local")
 	t.Log(out)
 	require.NoError(t, err, "start Gamma server should succeed")
-	require.True(t, strings.Contains(out, `Orbs Gamma personal blockchain experimental`), "started Gamma server should not be experimental")
+	require.True(t, strings.Contains(out, `Orbs Gamma personal blockchain experimental`), "started Gamma server should be experimental")
+	require.True(t, strings.Contains(out, `Prism blockchain explorer experimental`), "started Prism server should be experimental")
 }
