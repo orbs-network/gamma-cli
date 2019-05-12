@@ -29,6 +29,7 @@ func TestVersion(t *testing.T) {
 	out, err := GammaCli().WithStableServer().Run("version")
 	t.Log(out)
 	require.NoError(t, err, "version should succeed")
-	require.True(t, strings.Contains(out, "version"))
+	require.True(t, strings.Contains(out, "Gamma server version"))
+	require.True(t, strings.Contains(out, "Prism blockchain explorer version"))
 	require.False(t, strings.Contains(out, `version experimental (docker)`), "started Gamma server should not be experimental")
 }
