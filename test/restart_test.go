@@ -8,6 +8,7 @@ package test
 
 import (
 	"github.com/stretchr/testify/require"
+	"os/exec"
 	"strings"
 	"testing"
 )
@@ -30,6 +31,32 @@ func TestRestart(t *testing.T) {
 
 	_, err = cli.Run("start-local")
 	require.NoError(t, err, "start Gamma server should succeed")
+}
+
+func TestStopAfterCrashOfGammaServer(t *testing.T) {
+	cli := GammaCli().WithExperimentalServer()
+	defer cli.StopGammaServer()
+
+	out, err := cli.Run("start-local")
+	t.Log(out)
+	require.NoError(t, err, "start Gamma server should succeed")
+	require.True(t, strings.Contains(out, `Orbs Gamma personal blockchain experimental`), "started Gamma server should be experimental")
+	require.True(t, strings.Contains(out, `Prism blockchain explorer experimental`), "started Prism server should be experimental")
+
+	// stopping and removing gamma-server
+	dockerOut, err := exec.Command("docker", "stop", "orbs-gamma-server").CombinedOutput()
+	if err != nil {
+		t.Fatalf("%s", dockerOut)
+	}
+	dockerOut, err = exec.Command("docker", "rm", "-f", "orbs-gamma-server").CombinedOutput()
+	if err != nil {
+		t.Fatalf("Could not remove docker container.\n\n%s", dockerOut)
+	}
+
+	// running the regular gamma stop
+	out, err = cli.Run("stop-local")
+	require.NoError(t, err, "stop Gamma server should succeed")
+	require.True(t, strings.Contains(out, "Prism blockchain explorer stopped."), "Prism server should stop even if gamma crashed")
 }
 
 func TestStartedButNotReadyMessage(t *testing.T) {

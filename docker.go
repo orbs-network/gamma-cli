@@ -48,7 +48,7 @@ func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []
 		commandGenerateTestKeys(nil)
 	}
 
-	if isDockerGammaRunning(dockerOptions.containerName) {
+	if isDockerContainerRunning(dockerOptions.containerName) {
 		log(`
 *********************************************************************************
               %s is already running!
@@ -83,7 +83,7 @@ func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []
 		die("Could not exec 'docker run' command.\n\n%s", out)
 	}
 
-	if !isDockerGammaRunning(dockerOptions.containerName) {
+	if !isDockerContainerRunning(dockerOptions.containerName) {
 		die("Could not run docker image.")
 	}
 
@@ -108,15 +108,14 @@ func commandStopLocalContainer(dockerOptions handlerOptions, requiredOptions []s
 	out, err := exec.Command("docker", "stop", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
 		log("%s server is already stopped.\n", dockerOptions.name)
-		exit()
 	}
 
 	out, err = exec.Command("docker", "rm", "-f", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
-		die("Could not remove docker container.\n\n%s", out)
+		log("Could not remove docker container.\n\n%s", out)
 	}
 
-	if isDockerGammaRunning(dockerOptions.containerName) {
+	if isDockerContainerRunning(dockerOptions.containerName) {
 		die("Could not stop docker container.")
 	}
 
@@ -178,7 +177,7 @@ func verifyDockerInstalled(dockerRepo string, dockerRegistryTagUrl string) strin
 	return extractTagFromDockerImagesOutput(dockerRepo, string(out))
 }
 
-func isDockerGammaRunning(containerName string) bool {
+func isDockerContainerRunning(containerName string) bool {
 	out, err := exec.Command("docker", "ps", "-f", fmt.Sprintf("name=%s", containerName)).CombinedOutput()
 	if err != nil {
 		return false
