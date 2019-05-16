@@ -42,13 +42,13 @@ func commandUpgrade(requiredOptions []string) {
 }
 
 func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
-	version := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+	version := verifyDockerInstalled(dockerOptions, dockerOptions.dockerRegistryTagsUrl)
 
 	if !doesFileExist(*flagKeyFile) {
 		commandGenerateTestKeys(nil)
 	}
 
-	if isDockerGammaRunning(dockerOptions.containerName) {
+	if isDockerContainerRunning(dockerOptions.containerName) {
 		log(`
 *********************************************************************************
               %s is already running!
@@ -83,7 +83,7 @@ func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []
 		die("Could not exec 'docker run' command.\n\n%s", out)
 	}
 
-	if !isDockerGammaRunning(dockerOptions.containerName) {
+	if !isDockerContainerRunning(dockerOptions.containerName) {
 		die("Could not run docker image.")
 	}
 
@@ -103,20 +103,19 @@ func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []
 }
 
 func commandStopLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
-	verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+	verifyDockerInstalled(dockerOptions, dockerOptions.dockerRegistryTagsUrl)
 
 	out, err := exec.Command("docker", "stop", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
 		log("%s server is already stopped.\n", dockerOptions.name)
-		exit()
 	}
 
 	out, err = exec.Command("docker", "rm", "-f", dockerOptions.containerName).CombinedOutput()
 	if err != nil {
-		die("Could not remove docker container.\n\n%s", out)
+		log("Could not remove docker container.\n\n%s", out)
 	}
 
-	if isDockerGammaRunning(dockerOptions.containerName) {
+	if isDockerContainerRunning(dockerOptions.containerName) {
 		die("Could not stop docker container.")
 	}
 
@@ -132,24 +131,23 @@ func commandStopLocalContainer(dockerOptions handlerOptions, requiredOptions []s
 }
 
 func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string) {
-	currentTag := verifyDockerInstalled(dockerOptions.dockerRepo, dockerOptions.dockerRegistryTagsUrl)
+	currentTag := verifyDockerInstalled(dockerOptions, dockerOptions.dockerRegistryTagsUrl)
 	latestTag := getLatestDockerTag(dockerOptions.dockerRegistryTagsUrl)
 
 	if !isExperimental() && cmpTags(latestTag, currentTag) <= 0 {
-		log("Current %s stable version %s does not require upgrade.\n", dockerOptions.name, currentTag)
-		exit()
+		log("Current %s stable version %s does not require upgrade.", dockerOptions.name, currentTag)
+	} else {
+		log("Downloading latest version %s:\n", latestTag)
+		cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+		log("")
 	}
-
-	log("Downloading latest version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
-	log("")
 }
 
-func verifyDockerInstalled(dockerRepo string, dockerRegistryTagUrl string) string {
-	out, err := exec.Command("docker", "images", dockerRepo).CombinedOutput()
+func verifyDockerInstalled(dockerOptions handlerOptions, dockerRegistryTagUrl string) string {
+	out, err := exec.Command("docker", "images", dockerOptions.dockerRepo).CombinedOutput()
 	if err != nil {
 		if runtime.GOOS == "darwin" {
 			die("Docker is required but not running. Is it installed on your machine?\n\nInstall from:  https://docs.docker.com/docker-for-mac/install/")
@@ -158,28 +156,28 @@ func verifyDockerInstalled(dockerRepo string, dockerRegistryTagUrl string) strin
 		}
 	}
 
-	existingTag := extractTagFromDockerImagesOutput(dockerRepo, string(out))
+	existingTag := extractTagFromDockerImagesOutput(dockerOptions.dockerRepo, string(out))
 	if existingTag != DOCKER_TAG_NOT_FOUND {
 		return existingTag
 	}
 
 	latestTag := getLatestDockerTag(dockerRegistryTagUrl)
 
-	log("Orbs personal blockchain docker image is not installed, downloading version %s:\n", latestTag)
-	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerRepo, latestTag))
+	log("%s image is not installed, downloading version %s:\n", dockerOptions.name, latestTag)
+	cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 	log("")
 
-	out, err = exec.Command("docker", "images", dockerRepo).CombinedOutput()
+	out, err = exec.Command("docker", "images", dockerOptions.dockerRepo).CombinedOutput()
 	if err != nil || strings.Count(string(out), "\n") == 1 {
 		die("Could not download docker image.")
 	}
-	return extractTagFromDockerImagesOutput(dockerRepo, string(out))
+	return extractTagFromDockerImagesOutput(dockerOptions.dockerRepo, string(out))
 }
 
-func isDockerGammaRunning(containerName string) bool {
+func isDockerContainerRunning(containerName string) bool {
 	out, err := exec.Command("docker", "ps", "-f", fmt.Sprintf("name=%s", containerName)).CombinedOutput()
 	if err != nil {
 		return false
