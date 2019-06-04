@@ -8,7 +8,6 @@ Gamma is a personal Orbs blockchain that allows developers to easily test, run a
 
 `gamma-cli` - command line tool for developers to interact with a Gamma server instance running on their machine. 
 
-&nbsp;
 
 ## Detailed documentation
 
@@ -16,26 +15,23 @@ The detailed documentation website for Gamma is available here:
 
 https://orbs.gitbook.io
 
-&nbsp;
-
 ## Quick start
 
-### Prerequisites (Mac)
+<details>
+<summary>Mac</summary>
 
+### Prerequisites
 * Make sure [brew](https://brew.sh/) is available on your machine.
-
 * Make sure [Docker](https://docs.docker.com/docker-for-mac/install/) is installed on your machine.
-
-* If you're planning to develop your own smart contracts in Go, install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation).
+* If you're planning to develop your own smart contracts in Go 
+    * Install [Go language](https://golang.org/doc/install#macos)
+    * Install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation)
 
 ### Installation
-
 1. To install the command line tool, run the following command in terminal:
-
     ```
     brew install orbs-network/devtools/gamma-cli
     ```
-    
     > To verify the installation, run in terminal `gamma-cli version`
     
 2. Gamma server will automatically be installed the first time you start it with `gamma-cli start-local`
@@ -43,20 +39,52 @@ https://orbs.gitbook.io
 ### Starting and stopping Gamma server 
 
 * Start Gamma server by running in terminal:
-
     ```
     gamma-cli start-local
     ```
-
 * When finished working with the server, stop it by running in terminal:
-
     ```
     gamma-cli stop-local
     ```
-    
     > Note: The local blockchain instance is running in-memory. The next time you start the instance, all contracts and state will disappear from memory and you will need to deploy them again.
 
-&nbsp;
+</details>
+
+<details>
+    <summary>Windows</summary>
+
+### Prerequisites
+* Make sure [Docker](https://www.docker.com/products/docker-desktop) is installed on your machine.
+* If you're planning to develop your own smart contracts in Go 
+    * Install [Go language](https://golang.org/doc/install#windows)
+    * Install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation)
+
+### Installation
+* Download latest version of Gamma from [releases](https://github.com/orbs-network/gamma-cli/releases)
+* Extract the archive to `Program Files`
+* Edit `$profile` settings of PowerShell
+   * Create a file: `C:\Users\<Your User>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` or edit it.
+   * Add the following content:
+   ```bash
+   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+   New-Alias gamma-cli 'C:\Program Files\gammacli-windows-v0.7.0\_bin\gamma-cli.exe'
+   ```
+* Verify the installation: open PowerShell and run `gamma-cli version`. You should see the current version, e.g. `v0.7.0`
+
+### Starting and stopping Gamma server 
+
+* Start Gamma server by running in terminal:
+    ```
+    gamma-cli start-local
+    ```
+* When finished working with the server, stop it by running in terminal:
+    ```
+    gamma-cli stop-local
+    ```
+    > Note: The local blockchain instance is running in-memory. The next time you start the instance, all contracts and state will disappear from memory and you will need to deploy them again.
+    
+</details>
+
 
 ## Commands
 
@@ -130,9 +158,7 @@ Multiple environments (eg. local and testnet) can be defined in orbs-gamma-confi
 See https://orbs.gitbook.io for more info.
 ```
 
-&nbsp;
-
-## Upgrading to latest stable versions
+## Upgrading to latest stable versions (Mac)
 
 * Upgrade to the latest version of `gamma-cli` by running in terminal:
 
@@ -145,8 +171,6 @@ See https://orbs.gitbook.io for more info.
     ```
     gamma-cli upgrade-server
     ```
-
-&nbsp;
 
 ## Working with latest dev versions (experimental)
 
@@ -167,8 +191,6 @@ See https://orbs.gitbook.io for more info.
     ```
     gamma-cli start-local -env experimental
     ```
-
-&nbsp;
 
 ## Advanced debugging
 
