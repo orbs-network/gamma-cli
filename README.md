@@ -56,7 +56,7 @@ https://orbs.gitbook.io
 ### Prerequisites
 * Make sure [Docker](https://www.docker.com/products/docker-desktop) is installed on your machine.
 * If you're planning to develop your own smart contracts in Go 
-    * Install [Go language](https://golang.org/doc/install#macos)
+    * Install [Go language](https://golang.org/doc/install#windows)
     * Install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation)
 
 ### Installation
