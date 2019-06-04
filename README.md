@@ -57,8 +57,35 @@ https://orbs.gitbook.io
     <summary>Windows</summary>
 
 ### Prerequisites
+* Make sure [Docker](https://www.docker.com/products/docker-desktop) is installed on your machine.
+* If you're planning to develop your own smart contracts in Go 
+    * Install [Go language](https://golang.org/doc/install#macos)
+    * Install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation)
+
 ### Installation
+* Download latest version of Gamma from [releases](https://github.com/orbs-network/gamma-cli/releases)
+* Extract the archive to `Program Files`
+* Edit `$profile` settings of PowerShell
+   * Create a file: `C:\Users\<Your User>\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` or edit it.
+   * Add the following content:
+   ```bash
+   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+   New-Alias gamma-cli 'C:\Program Files\gammacli-windows-v0.7.0\_bin\gamma-cli.exe'
+   ```
+* Verify the installation: open PowerShell and run `gamma-cli version`. You should see the current version, e.g. `v0.7.0`
+
 ### Starting and stopping Gamma server 
+
+* Start Gamma server by running in terminal:
+    ```
+    gamma-cli start-local
+    ```
+* When finished working with the server, stop it by running in terminal:
+    ```
+    gamma-cli stop-local
+    ```
+    > Note: The local blockchain instance is running in-memory. The next time you start the instance, all contracts and state will disappear from memory and you will need to deploy them again.
+    
 </details>
 
 
