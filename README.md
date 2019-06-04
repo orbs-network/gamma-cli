@@ -8,15 +8,12 @@ Gamma is a personal Orbs blockchain that allows developers to easily test, run a
 
 `gamma-cli` - command line tool for developers to interact with a Gamma server instance running on their machine. 
 
-&nbsp;
 
 ## Detailed documentation
 
 The detailed documentation website for Gamma is available here:
 
 https://orbs.gitbook.io
-
-&nbsp;
 
 ## Quick start
 
@@ -161,9 +158,7 @@ Multiple environments (eg. local and testnet) can be defined in orbs-gamma-confi
 See https://orbs.gitbook.io for more info.
 ```
 
-&nbsp;
-
-## Upgrading to latest stable versions
+## Upgrading to latest stable versions (Mac)
 
 * Upgrade to the latest version of `gamma-cli` by running in terminal:
 
@@ -176,8 +171,6 @@ See https://orbs.gitbook.io for more info.
     ```
     gamma-cli upgrade-server
     ```
-
-&nbsp;
 
 ## Working with latest dev versions (experimental)
 
@@ -198,8 +191,6 @@ See https://orbs.gitbook.io for more info.
     ```
     gamma-cli start-local -env experimental
     ```
-
-&nbsp;
 
 ## Advanced debugging
 
