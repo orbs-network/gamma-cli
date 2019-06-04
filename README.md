@@ -26,15 +26,15 @@ https://orbs.gitbook.io
 ### Prerequisites
 * Make sure [brew](https://brew.sh/) is available on your machine.
 * Make sure [Docker](https://docs.docker.com/docker-for-mac/install/) is installed on your machine.
-* If you're planning to develop your own smart contracts in Go, install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation).
+* If you're planning to develop your own smart contracts in Go 
+    * Install [Go language](https://golang.org/doc/install#macos)
+    * Install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation)
 
 ### Installation
 1. To install the command line tool, run the following command in terminal:
-
     ```
     brew install orbs-network/devtools/gamma-cli
     ```
-    
     > To verify the installation, run in terminal `gamma-cli version`
     
 2. Gamma server will automatically be installed the first time you start it with `gamma-cli start-local`
