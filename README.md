@@ -20,16 +20,15 @@ https://orbs.gitbook.io
 
 ## Quick start
 
-### Prerequisites (Mac)
+<details>
+<summary>Mac</summary>
 
+### Prerequisites
 * Make sure [brew](https://brew.sh/) is available on your machine.
-
 * Make sure [Docker](https://docs.docker.com/docker-for-mac/install/) is installed on your machine.
-
 * If you're planning to develop your own smart contracts in Go, install the [Orbs Smart Contract SDK](https://github.com/orbs-network/orbs-contract-sdk#installation).
 
 ### Installation
-
 1. To install the command line tool, run the following command in terminal:
 
     ```
@@ -43,20 +42,25 @@ https://orbs.gitbook.io
 ### Starting and stopping Gamma server 
 
 * Start Gamma server by running in terminal:
-
     ```
     gamma-cli start-local
     ```
-
 * When finished working with the server, stop it by running in terminal:
-
     ```
     gamma-cli stop-local
     ```
-    
     > Note: The local blockchain instance is running in-memory. The next time you start the instance, all contracts and state will disappear from memory and you will need to deploy them again.
 
-&nbsp;
+</details>
+
+<details>
+    <summary>Windows</summary>
+
+### Prerequisites
+### Installation
+### Starting and stopping Gamma server 
+</details>
+
 
 ## Commands
 
