@@ -7,6 +7,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
@@ -146,6 +147,34 @@ func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string)
 	}
 }
 
+func showLogs(requiredOptions []string) {
+	dockerOptions := gammaHandlerOptions()
+	verifyDockerInstalled(dockerOptions, dockerOptions.dockerRegistryTagsUrl)
+
+	cmd := exec.Command("docker", "logs", "-f", "--tail=20", dockerOptions.containerName)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		die("could not read gamma server docker logs: %s", err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		die("could not start docker logs command: %s", err)
+	}
+
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if testGammaLogLine(line)  {
+			fmt.Println(line)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		die("error reading gamma server docker logs: %s", err)
+	}
+}
+
+// TODO remove dockerRegistryUrl as separate parameter
 func verifyDockerInstalled(dockerOptions handlerOptions, dockerRegistryTagUrl string) string {
 	out, err := exec.Command("docker", "images", dockerOptions.dockerRepo).CombinedOutput()
 	if err != nil {
@@ -300,4 +329,10 @@ func createDockerNetwork() error {
 
 func prismEnabled() bool {
 	return !*flagNoUi
+}
+
+func testGammaLogLine(line string) bool {
+	return !strings.Contains(line, "info ") && !strings.HasPrefix(line, "error ") &&
+		!strings.HasPrefix(line, "debug ") && !strings.HasPrefix(line, "\t") &&
+		!strings.HasPrefix(line, "] ")
 }

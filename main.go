@@ -149,15 +149,24 @@ var commands = map[string]*command{
 		sort:            8,
 		requiredOptions: nil,
 	},
+	"logs": {
+		desc: "streams logs from gamma that are printed by smart contract",
+		handler: showLogs,
+		sort: 9,
+		example: "gamma-cli logs",
+		example2: "gamma-cli logs hello",
+		requiredOptions: nil,
+
+	},
 	"version": {
 		desc:            "print gamma-cli and Gamma server versions",
 		handler:         commandVersion,
-		sort:            9,
+		sort:            10,
 		requiredOptions: nil,
 	},
 	"help": {
 		desc:            "print this help screen",
-		sort:            10,
+		sort:            11,
 		requiredOptions: nil,
 	},
 }
