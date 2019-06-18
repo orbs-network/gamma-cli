@@ -132,6 +132,8 @@ Commands:
                    example: gamma-cli upgrade-server
                             gamma-cli upgrade-server -env experimental
 
+  logs             streams logs from gamma that are printed by smart contract to stdout (i.e. println())
+
   version          print gamma-cli and Gamma server versions
 
   help             print this help screen
