@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const GAMMA_CLI_VERSION = "0.7.0"
+const GAMMA_CLI_VERSION = "0.7.1"
 const CONFIG_FILENAME = "orbs-gamma-config.json"
 const TEST_KEYS_FILENAME = "orbs-test-keys.json"
 const LOCAL_ENV_ID = "local"
@@ -149,15 +149,22 @@ var commands = map[string]*command{
 		sort:            8,
 		requiredOptions: nil,
 	},
+	"logs": {
+		desc: "streams logs from gamma that are printed by smart contract to stdout (i.e. fmt.Println)",
+		handler: showLogs,
+		sort: 9,
+		example: "gamma-cli logs",
+		requiredOptions: nil,
+	},
 	"version": {
 		desc:            "print gamma-cli and Gamma server versions",
 		handler:         commandVersion,
-		sort:            9,
+		sort:            10,
 		requiredOptions: nil,
 	},
 	"help": {
 		desc:            "print this help screen",
-		sort:            10,
+		sort:            11,
 		requiredOptions: nil,
 	},
 }
