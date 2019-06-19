@@ -7,10 +7,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/orbs-network/orbs-contract-sdk/go/sdk/v1"
 	"github.com/orbs-network/orbs-contract-sdk/go/sdk/v1/events"
 	"github.com/orbs-network/orbs-contract-sdk/go/sdk/v1/state"
+	"strconv"
 )
 
 var PUBLIC = sdk.Export(add, get, start)
@@ -27,7 +27,7 @@ func _init() {
 
 func add(amount uint64) {
 	count := state.ReadUint64(COUNTER_KEY)
-	events.EmitEvent(Log, fmt.Sprintf("previous count is %d", count))
+	events.EmitEvent(Log, "previous count is " + strconv.FormatUint(count, 10))
 	count += amount
 	state.WriteUint64(COUNTER_KEY, count)
 }
