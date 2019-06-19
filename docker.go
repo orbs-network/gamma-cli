@@ -152,7 +152,7 @@ func showLogs(requiredOptions []string) {
 	verifyDockerInstalled(dockerOptions, dockerOptions.dockerRegistryTagsUrl)
 
 	cmd := exec.Command("docker", "logs", "-f", "--tail=20", dockerOptions.containerName)
-	stdout, err := cmd.StdoutPipe()
+	stdout, err := cmd.StderrPipe() // println() and print() go to stderr
 	if err != nil {
 		die("could not read gamma server docker logs: %s", err)
 	}
@@ -163,11 +163,7 @@ func showLogs(requiredOptions []string) {
 
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
-		line := scanner.Text()
-
-		if testGammaLogLine(line)  {
-			fmt.Println(line)
-		}
+		fmt.Println(scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
 		die("error reading gamma server docker logs: %s", err)
@@ -329,10 +325,4 @@ func createDockerNetwork() error {
 
 func prismEnabled() bool {
 	return !*flagNoUi
-}
-
-func testGammaLogLine(line string) bool {
-	return !strings.Contains(line, "info ") && !strings.HasPrefix(line, "error ") &&
-		!strings.HasPrefix(line, "debug ") && !strings.HasPrefix(line, "\t") &&
-		!strings.HasPrefix(line, "] ")
 }

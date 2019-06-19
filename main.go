@@ -150,7 +150,7 @@ var commands = map[string]*command{
 		requiredOptions: nil,
 	},
 	"logs": {
-		desc: "streams logs from gamma that are printed by smart contract to stdout (i.e. fmt.Println)",
+		desc: "streams logs from gamma that are printed by smart contract to stdout (i.e. println())",
 		handler: showLogs,
 		sort: 9,
 		example: "gamma-cli logs",
