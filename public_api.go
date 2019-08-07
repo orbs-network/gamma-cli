@@ -11,7 +11,6 @@ import (
 	"github.com/orbs-network/gamma-cli/jsoncodec"
 	"github.com/orbs-network/orbs-client-sdk-go/codec"
 	"github.com/orbs-network/orbs-client-sdk-go/orbs"
-	"github.com/orbs-network/orbs-client-sdk-go/utils"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net"
@@ -31,7 +30,7 @@ func _getSource(name string) (code [][]byte, err error) {
 	if info, err := os.Stat(name); err != nil {
 		return nil, err
 	} else if info.IsDir() {
-		return utils.ReadSourcesFromDir(name)
+		return orbs.ReadSourcesFromDir(name)
 	} else {
 		singleFile, err := ioutil.ReadFile(name)
 		if err != nil {
