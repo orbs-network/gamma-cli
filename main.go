@@ -100,7 +100,7 @@ var commands = map[string]*command{
 	},
 	"deploy": {
 		desc:            "deploy a smart contract with the code specified in the source file <CODE_FILE>",
-		args:            "<CODE_FILE> -name [CONTRACT_NAME] -signer [ID_FROM_KEYS_JSON]",
+		args:            "<CODE_FILE|CODE_DIR> -name [CONTRACT_NAME] -signer [ID_FROM_KEYS_JSON]",
 		example:         "gamma-cli deploy MyToken.go -signer user1",
 		example2:        "gamma-cli deploy contract.go -name MyToken",
 		handler:         commandDeploy,
