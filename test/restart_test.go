@@ -60,13 +60,15 @@ func TestStopAfterCrashOfGammaServer(t *testing.T) {
 }
 
 func TestStartedButNotReadyMessage(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer()
+	cli := GammaCli().WithExperimentalServer().WithNoPrism()
 	defer cli.StopGammaServer()
 
-	_, err := cli.Run("start-local") // without -wait
-	require.NoError(t, err, "start Gamma server should succeed")
+	_, stopErr := cli.Run("stop-local")
+	require.NoError(t, stopErr, "making sure everything is stopped from previous tests (will become flaky if not)")
+	cli = cli.StartGammaServer() // without -wait
 
 	out, err := cli.Run("send-tx", "transfer.json")
+	require.Error(t, err, "executing a command while server is starting should work (by returning an error)")
 	t.Log(out)
 
 	require.True(t, strings.Contains(out, `may need a second to initialize`))

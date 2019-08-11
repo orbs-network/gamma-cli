@@ -6,7 +6,7 @@ import (
 )
 
 func TestGammaCli_StartWithConfigOverrides(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().WithConfigOverrides(`{"virtual-chain-id":43}`).StartGammaServer()
+	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().WithConfigOverrides(`{"virtual-chain-id":43}`).StartGammaServerAndWait()
 	defer cli.StopGammaServer()
 
 	out, err := cli.Run("start-local")
