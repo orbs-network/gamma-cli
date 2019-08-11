@@ -109,28 +109,30 @@ func (g *gammaCli) WithNoPrism() *gammaCli {
 }
 
 func (g *gammaCli) StartGammaServerAndWait() *gammaCli {
-	out, err := g.Run("start-local", "-wait")
-	if err != nil {
-		panic(fmt.Sprintf("start Gamma server failed: %s\noutput:\n%s\n", err.Error(), out))
-	}
-	fmt.Println(out)
-	return g
+	return g.startInternal(true)
 }
 
 func (g *gammaCli) StartGammaServer() *gammaCli {
-	arg := ""
-	if !g.prism {
-		arg = "-no-ui"
+	return g.startInternal(false)
+}
+
+func (g *gammaCli) startInternal(shouldWait bool) *gammaCli {
+	commands := []string{"start-local"}
+	if shouldWait {
+		commands = append(commands, "-wait")
 	}
 
-	out, err := g.Run("start-local", arg)
+	if !g.prism {
+		commands = append(commands, "-no-ui")
+	}
+
+	out, err := g.Run(commands...)
 	if err != nil {
 		panic(fmt.Sprintf("start Gamma server failed: %s\noutput:\n%s\n", err.Error(), out))
 	}
 	fmt.Println(out)
 	return g
 }
-
 
 func (g *gammaCli) StopGammaServer() {
 	out, err := g.Run("stop-local")
