@@ -6,6 +6,16 @@
 # If you don't have Docker installed, please have a look here on how to install it on Ubuntu Linux:
 # https://docs.docker.com/v17.12/install/linux/docker-ce/ubuntu/
 
+docker ps &> /dev/null
+
+DOCKER_TEST_EXITCODE=$?
+
+if [ $DOCKER_TEST_EXITCODE != 0 ]; then
+    echo "Docker is not properly installed"
+    echo "Read more here: https://docs.docker.com/v17.12/install/linux/linux-postinstall/"
+    exit 1
+fi
+
 GAMMA_CLI_VERSION="v0.7.0"
 GAMMA_CLI_URL="https://github.com/orbs-network/gamma-cli/releases/download/$GAMMA_CLI_VERSION/gammacli-linux-x86-64-$GAMMA_CLI_VERSION.tar.gz"
 
