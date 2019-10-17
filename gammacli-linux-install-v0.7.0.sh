@@ -10,7 +10,7 @@ docker ps &> /dev/null
 
 DOCKER_TEST_EXITCODE=$?
 
-if [ $DOCKER_TEST_EXITCODE != 0 ]; then
+if [[ $DOCKER_TEST_EXITCODE != 0 ]]; then
     echo "Docker is not properly installed"
     echo "Read more here: https://docs.docker.com/v17.12/install/linux/linux-postinstall/"
     exit 1
