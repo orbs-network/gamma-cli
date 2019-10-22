@@ -1,9 +1,9 @@
 # Google Cloud Launcher
 
 ## Deploying
-First off we're going to deploy a cluster.  That's really easy with Cloud Launcher.  Simply go to https://console.cloud.google.com/launcher/details/datastax-public/datastax-enterprise
+First off we're going to deploy a development server (Gamma server) and Prism.  That's really easy with Cloud Launcher.  Simply go to https://console.cloud.google.com/launcher/details/orbsltd-public/orbs-gamma-devkit
 
-![](./img/cloudlauncherlandingpage.png)
+![](./images/step01.png)
 
 Click "Launch on Compute Engine"
 
