@@ -68,7 +68,7 @@ We should now be located inside the folder containg the file `contract.go`. Let'
 
 ![](./images/step11.png)
 
-Next we will deploy the contract into the our Gamma server by typing the following command: `gamma-cli deploy contract.go -name MyCounter` and wait for it to finish. Once finished, Gamma CLI will return a JSON output object representing the result of our transaction against the server. Which (if all is successful) should look similar to the following
+Next we will deploy the contract into our Gamma server by typing the following command: `gamma-cli deploy contract.go -name MyCounter` and wait for it to finish. Once finished, Gamma CLI will return a JSON output object representing the result of our transaction against the server. Which (if all is successful) should look similar to the following
 
 ![](./images/step12.png)
 
@@ -118,9 +118,9 @@ and the input from this call should look something similar to the following:
 
 ![](./images/step17.png)
 
-As you can see, the response seems to be successful! We've got again an `ExecutionResult` of `SUCCESS` which is great and means our transaction went through and was also `COMMITTED` into a block which is accepted by the network there being commited to the ledger. So all in all great news! We've actually modified the state of our contract now and updated the counter variable in it's state to represent a differnt value (25)
+As you can see, the response seems to be successful! We've got again an `ExecutionResult` of `SUCCESS` which is great and means our transaction went through and was also `COMMITTED` into a block which is accepted by the network there being commited to the ledger. So all in all great news! We've actually modified the state of our contract now and updated the counter variable in it's state to represent a different value (25)
 
-Let's verify this is truly the reality by issuing another `get()` call and assert that we actually got 25 and not 0 as before.
+Let's verify this is truly the reality by issuing another `get()` call and assert that we actually get 25 and not 0 as before.
 
 ![](./images/step18.png)
 
@@ -133,4 +133,4 @@ You've probably noticed that we've used `send-tx` and `run-query` on some of the
 
 To read more about this and learn more about blockchain in general and how to move forward into more complex examples using Orbs be sure to [visit our GitBook](https://orbs.gitbook.io/contract-sdk/)
 
-To learn more about Orbs and it's projects feel free to [visit our website](https://www.orbs.com/)
+To learn more about Orbs and it's mission feel free to [visit our website](https://www.orbs.com/)
