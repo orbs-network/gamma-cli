@@ -14,11 +14,11 @@ Deploying is really easy with Cloud Launcher.
 
 Click "Launch on Compute Engine"
 
-![](./img/step02.png)
+![](./images/step02.png)
 
 You can take the default settings or customize them.  When complete click "Deploy"
 
-![](./img/step03.png)
+![](./images/step03.png)
 
 That's it!  Your development kit is now deploying.
 
