@@ -1,14 +1,14 @@
 # Google Cloud Launcher
+This guide will ... deploying... testing and finally developing with...
 
 ## Deploying
-First off we're going to deploy an Orbs development kit. 
+First, we're going to deploy an Orbs development kit. 
 The kit consists of:
-* Gamma server - Our development local blockchain which will store our data and answer our calls)
+* Gamma server - Our development local blockchain which stores our data and answers our calls)
 * Gamma CLI - The CLI allows us to easily deploy contracts onto the blockchain and perform calls against our deployed contract.
-* Prism - Orbs' block explorer which essentially provides visibility into blocks and transactions which have been registered on our network.
+* Prism - Orbs' block explorer, which provides visibility into blocks and transactions which have been registered on our network.
 
-Deploying is really easy with Cloud Launcher.
-   Simply go to https://console.cloud.google.com/launcher/details/orbsltd-public/orbs-gamma-devkit
+Deploying is easy with Cloud Launcher: Go to https://console.cloud.google.com/launcher/details/orbsltd-public/orbs-gamma-devkit
 
 ![](./images/step01.png)
 
@@ -24,11 +24,13 @@ That's it!  Your development kit is now deploying.
 
 ## Inspecting the kit once it's running
 
-When complete you should see:
+When the deployment is complete, you should see:
 
 ![](./images/step04.png)
 
-Gamma, the development server is configured to close a block once every 10 minutes or so OR when at least 1 transaction is pushed through with an API call. So at this point we can open a web browser and view Prism to see the blocks activity, let's click on "Visit the site" button.
+Note: Gamma, the development server, is configured to close a block once every 10 minutes or so, OR when at least 1 transaction is pushed through with an API call. 
+
+At this point, you can open a web browser and view Prism to see block activity. Click on the "Visit the site" button.
 
 ![](./images/step05.png)
 
@@ -36,7 +38,9 @@ Once the browser has finished loading, it should look like:
 
 ![](./images/step06.png)
 
-Great!  Our development kit is working and closing blocks that means we can start to play around with it.
+You should see a few blocks. That's great as it shows our development kit is working and closing blocks. 
+<!--- I would write - four nodes are working in consensus and closing blocks.... -->
+That means we can start to play around with it.
 
 The next kind of interaction we can have with our development kit is to deploy a smart contract into the blockchain and interact with it.
 
@@ -103,7 +107,7 @@ Again, the returned output contains a bit of information. We've highlighted what
 
 All looks good so far!
 
-Now let's make things intresting by running a transaction that will add `25` to that lonely `0` and make the counter higher!
+Now let's make things intresting by running a transaction that will add '25` to that lonely `0` and make the counter higher!
 
 As before, let's view how the JSON file to describe this action is represented for Gamma CLI to use by typing `cat json/add-25.json`
 
