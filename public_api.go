@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"syscall"
@@ -25,6 +26,21 @@ const DEPLOY_SYSTEM_METHOD_NAME = "deployService"
 const PROCESSOR_TYPE_NATIVE = uint32(1)
 const PROCESSOR_TYPE_JAVASCRIPT = uint32(2)
 
+func _getSource(name string) (code [][]byte, err error) {
+	if info, err := os.Stat(name); err != nil {
+		return nil, err
+	} else if info.IsDir() {
+		return orbs.ReadSourcesFromDir(name)
+	} else {
+		singleFile, err := ioutil.ReadFile(name)
+		if err != nil {
+			return nil, err
+		}
+
+		return [][]byte{singleFile}, err
+	}
+}
+
 func commandDeploy(requiredOptions []string) {
 	codeFile := requiredOptions[0]
 
@@ -32,17 +48,16 @@ func commandDeploy(requiredOptions []string) {
 		*flagContractName = getFilenameWithoutExtension(codeFile)
 	}
 
-	processorType := getProcessorTypeFromFilename(codeFile)
-	code, err := ioutil.ReadFile(codeFile)
+	code, err := _getSource(codeFile)
 	if err != nil {
-		die("Could not open code file.\n\n%s", err.Error())
+		die("Could not find path\n\n%s", err.Error())
 	}
 
 	signer := getTestKeyFromFile(*flagSigner)
 
 	client := createOrbsClient()
 
-	payload, txId, err := client.CreateTransaction(signer.PublicKey, signer.PrivateKey, DEPLOY_SYSTEM_CONTRACT_NAME, DEPLOY_SYSTEM_METHOD_NAME, string(*flagContractName), uint32(processorType), []byte(code))
+	payload, txId, err := client.CreateDeployTransaction(signer.PublicKey, signer.PrivateKey, string(*flagContractName), orbs.PROCESSOR_TYPE_NATIVE, code...)
 	if err != nil {
 		die("Could not encode payload of the message about to be sent to server.\n\n%s", err.Error())
 	}
@@ -216,15 +231,16 @@ func createOrbsClient() *orbs.OrbsClient {
 
 	endpoint := env.Endpoints[0]
 	if endpoint == "localhost" {
-		if !isDockerGammaRunning() && !isPortListening(*flagPort) {
+		if !isDockerContainerRunning(gammaHandlerOptions().containerName) && !isPortListening(gammaHandlerOptions().port) {
 			die("Local Gamma server is not running, use 'gamma-cli start-local' to start it.")
 		}
-		endpoint = fmt.Sprintf("http://localhost:%d", *flagPort)
+		endpoint = fmt.Sprintf("http://localhost:%d", gammaHandlerOptions().port)
 	}
 
 	return orbs.NewClient(endpoint, env.VirtualChain, codec.NETWORK_TYPE_TEST_NET)
 }
 
+// Will get to it when we implement JS
 func getProcessorTypeFromFilename(filename string) uint32 {
 	if strings.HasSuffix(filename, ".go") {
 		return PROCESSOR_TYPE_NATIVE

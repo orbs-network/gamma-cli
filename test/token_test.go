@@ -13,7 +13,7 @@ import (
 )
 
 func TestSimpleTransfer(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServer()
+	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServerAndWait()
 	defer cli.StopGammaServer()
 
 	out, err := cli.Run("run-query", "get-balance.json")

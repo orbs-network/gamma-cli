@@ -27,6 +27,7 @@ type gammaCli struct {
 	port            string
 	experimental    bool
 	configOverrides string
+	prism           bool
 }
 
 func compileGammaCli() string {
@@ -83,6 +84,7 @@ func GammaCli() *gammaCli {
 func GammaCliWithPort(port int) *gammaCli {
 	return &gammaCli{
 		port: fmt.Sprintf("%d", port),
+		prism: true,
 	}
 }
 
@@ -101,8 +103,30 @@ func (g *gammaCli) WithExperimentalServer() *gammaCli {
 	return g
 }
 
+func (g *gammaCli) WithNoPrism() *gammaCli {
+	g.prism = false
+	return g
+}
+
+func (g *gammaCli) StartGammaServerAndWait() *gammaCli {
+	return g.startInternal(true)
+}
+
 func (g *gammaCli) StartGammaServer() *gammaCli {
-	out, err := g.Run("start-local", "-wait")
+	return g.startInternal(false)
+}
+
+func (g *gammaCli) startInternal(shouldWait bool) *gammaCli {
+	commands := []string{"start-local"}
+	if shouldWait {
+		commands = append(commands, "-wait")
+	}
+
+	if !g.prism {
+		commands = append(commands, "-no-ui")
+	}
+
+	out, err := g.Run(commands...)
 	if err != nil {
 		panic(fmt.Sprintf("start Gamma server failed: %s\noutput:\n%s\n", err.Error(), out))
 	}

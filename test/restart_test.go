@@ -8,6 +8,7 @@ package test
 
 import (
 	"github.com/stretchr/testify/require"
+	"os/exec"
 	"strings"
 	"testing"
 )
@@ -20,6 +21,7 @@ func TestRestart(t *testing.T) {
 	t.Log(out)
 	require.NoError(t, err, "start Gamma server should succeed")
 	require.False(t, strings.Contains(out, `Orbs Gamma experimental personal blockchain`), "started Gamma server should not be experimental")
+	require.False(t, strings.Contains(out, `Prism blockchain explorer experimental`), "started Prism server should not be experimental")
 
 	_, err = cli.Run("stop-local")
 	require.NoError(t, err, "stop Gamma server should succeed")
@@ -31,14 +33,42 @@ func TestRestart(t *testing.T) {
 	require.NoError(t, err, "start Gamma server should succeed")
 }
 
-func TestStartedButNotReadyMessage(t *testing.T) {
+func TestStopAfterCrashOfGammaServer(t *testing.T) {
 	cli := GammaCli().WithExperimentalServer()
 	defer cli.StopGammaServer()
 
-	_, err := cli.Run("start-local") // without -wait
+	out, err := cli.Run("start-local")
+	t.Log(out)
 	require.NoError(t, err, "start Gamma server should succeed")
+	require.True(t, strings.Contains(out, `Orbs Gamma personal blockchain experimental`), "started Gamma server should be experimental")
+	require.True(t, strings.Contains(out, `Prism blockchain explorer experimental`), "started Prism server should be experimental")
+
+	// stopping and removing gamma-server
+	dockerOut, err := exec.Command("docker", "stop", "orbs-gamma-server").CombinedOutput()
+	if err != nil {
+		t.Fatalf("%s", dockerOut)
+	}
+	dockerOut, err = exec.Command("docker", "rm", "-f", "orbs-gamma-server").CombinedOutput()
+	if err != nil {
+		t.Fatalf("Could not remove docker container.\n\n%s", dockerOut)
+	}
+
+	// running the regular gamma stop
+	out, err = cli.Run("stop-local")
+	require.NoError(t, err, "stop Gamma server should succeed")
+	require.True(t, strings.Contains(out, "Prism blockchain explorer stopped."), "Prism server should stop even if gamma crashed")
+}
+
+func TestStartedButNotReadyMessage(t *testing.T) {
+	cli := GammaCli().WithExperimentalServer().WithNoPrism()
+	defer cli.StopGammaServer()
+
+	_, stopErr := cli.Run("stop-local")
+	require.NoError(t, stopErr, "making sure everything is stopped from previous tests (will become flaky if not)")
+	cli = cli.StartGammaServer() // without -wait
 
 	out, err := cli.Run("send-tx", "transfer.json")
+	require.Error(t, err, "executing a command while server is starting should work (by returning an error)")
 	t.Log(out)
 
 	require.True(t, strings.Contains(out, `may need a second to initialize`))

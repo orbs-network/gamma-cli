@@ -13,7 +13,7 @@ import (
 )
 
 func TestDeployCounter(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServer()
+	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServerAndWait()
 	defer cli.StopGammaServer()
 
 	out, err := cli.Run("deploy", "./_counter/contract.go", "-name", "CounterExample")
@@ -41,7 +41,7 @@ func TestDeployCounter(t *testing.T) {
 }
 
 func TestDeployCorruptContract(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServer()
+	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServerAndWait()
 	defer cli.StopGammaServer()
 
 	out, err := cli.Run("deploy", "./_corrupt/corrupt.go", "-name", "CounterExample")
@@ -52,7 +52,7 @@ func TestDeployCorruptContract(t *testing.T) {
 }
 
 func TestDeployOfAlreadyDeployed(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServer()
+	cli := GammaCli().WithExperimentalServer().DownloadLatestGammaServer().StartGammaServerAndWait()
 	defer cli.StopGammaServer()
 
 	out, err := cli.Run("deploy", "./_counter/contract.go", "-name", "CounterExample")
@@ -68,7 +68,7 @@ func TestDeployOfAlreadyDeployed(t *testing.T) {
 }
 
 func TestRunMethodWithoutDeploy(t *testing.T) {
-	cli := GammaCli().WithExperimentalServer().StartGammaServer()
+	cli := GammaCli().WithExperimentalServer().StartGammaServerAndWait()
 	defer cli.StopGammaServer()
 
 	out, err := cli.Run("send-tx", "counter-add.json")
