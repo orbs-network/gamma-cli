@@ -1,5 +1,5 @@
 # Google Cloud Launcher
-This guide will ... deploying... testing and finally developing with...
+This guide will cover the basics (and more!) of deploying the Orbs Gamma Testkit atop Google Cloud Platform from the GCP Marketplace using the Google Cloud Launcher. As a part of this guide, we will be deploying an instance of the kit, verify that it's running correctly and get a taste of how to develop and test your smart contracts using it to emphasize just how easy it is to develop on blockchain with Orbs!
 
 ## Deploying
 First, we're going to deploy an Orbs development kit. 
