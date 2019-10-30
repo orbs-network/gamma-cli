@@ -9,10 +9,19 @@ package jsoncodec
 import (
 	"encoding/json"
 	"github.com/orbs-network/orbs-client-sdk-go/codec"
+	"github.com/pkg/errors"
 	"strconv"
 )
 
 func MarshalTxStatusResponse(r *codec.GetTransactionStatusResponse) ([]byte, error) {
+	outputArgs, err := MarshalArgs(r.OutputArguments)
+	if err != nil {
+		return nil, errors.Errorf("Tx status response marshaling output arguments failed with %s \n", err.Error())
+	}
+	outputEvents, err := MarshalEvents(r.OutputEvents)
+	if err != nil {
+		return nil, errors.Errorf("Tx status response marshaling output events failed with %s \n", err.Error())
+	}
 	return json.MarshalIndent(&struct {
 		RequestStatus     codec.RequestStatus
 		ExecutionResult   codec.ExecutionResult
@@ -24,8 +33,8 @@ func MarshalTxStatusResponse(r *codec.GetTransactionStatusResponse) ([]byte, err
 	}{
 		RequestStatus:     r.RequestStatus,
 		ExecutionResult:   r.ExecutionResult,
-		OutputArguments:   MarshalArgs(r.OutputArguments),
-		OutputEvents:      MarshalEvents(r.OutputEvents),
+		OutputArguments:   outputArgs,
+		OutputEvents:      outputEvents,
 		TransactionStatus: r.TransactionStatus,
 		BlockHeight:       strconv.FormatUint(r.BlockHeight, 10),
 		BlockTimestamp:    r.BlockTimestamp.UTC().Format(codec.ISO_DATE_FORMAT),
