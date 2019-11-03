@@ -6,7 +6,10 @@
 
 package jsoncodec
 
-import "github.com/orbs-network/orbs-client-sdk-go/codec"
+import (
+	"github.com/orbs-network/orbs-client-sdk-go/codec"
+	"github.com/pkg/errors"
+)
 
 type Event struct {
 	ContractName string
@@ -14,14 +17,18 @@ type Event struct {
 	Arguments    []*Arg
 }
 
-func MarshalEvents(events []*codec.Event) []*Event {
+func MarshalEvents(events []*codec.Event) ([]*Event, error) {
 	res := []*Event{}
-	for _, event := range events {
+	for i, event := range events {
+		eventArgs, err := MarshalArgs(event.Arguments)
+		if err != nil {
+			return nil, errors.Errorf("Event %d arguments marshaling failed with %s \n", i+1, err.Error())
+		}
 		res = append(res, &Event{
 			ContractName: event.ContractName,
 			EventName:    event.EventName,
-			Arguments:    MarshalArgs(event.Arguments),
+			Arguments:    eventArgs,
 		})
 	}
-	return res
+	return res, nil
 }

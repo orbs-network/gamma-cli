@@ -9,6 +9,7 @@ package jsoncodec
 import (
 	"encoding/json"
 	"github.com/orbs-network/orbs-client-sdk-go/codec"
+	"github.com/pkg/errors"
 	"strconv"
 )
 
@@ -25,6 +26,14 @@ func UnmarshalSendTx(bytes []byte) (*SendTx, error) {
 }
 
 func MarshalSendTxResponse(r *codec.SendTransactionResponse, txId string) ([]byte, error) {
+	outputArgs, err := MarshalArgs(r.OutputArguments)
+	if err != nil {
+		return nil, errors.Errorf("Send Tx response marshaling output arguments failed with %s \n", err.Error())
+	}
+	outputEvents, err := MarshalEvents(r.OutputEvents)
+	if err != nil {
+		return nil, errors.Errorf("Send Tx response marshaling output events failed with %s \n", err.Error())
+	}
 	return json.MarshalIndent(&struct {
 		RequestStatus     codec.RequestStatus
 		TxId              string
@@ -38,8 +47,8 @@ func MarshalSendTxResponse(r *codec.SendTransactionResponse, txId string) ([]byt
 		RequestStatus:     r.RequestStatus,
 		TxId:              txId,
 		ExecutionResult:   r.ExecutionResult,
-		OutputArguments:   MarshalArgs(r.OutputArguments),
-		OutputEvents:      MarshalEvents(r.OutputEvents),
+		OutputArguments:   outputArgs,
+		OutputEvents:      outputEvents,
 		TransactionStatus: r.TransactionStatus,
 		BlockHeight:       strconv.FormatUint(r.BlockHeight, 10),
 		BlockTimestamp:    r.BlockTimestamp.UTC().Format(codec.ISO_DATE_FORMAT),

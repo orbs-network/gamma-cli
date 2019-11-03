@@ -2,13 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/github.com/google/go-cmp" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/github.com/orbs-network/go-mock" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/github.com/orbs-network/membuffers" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/github.com/orbs-network/orbs-spec" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/github.com/pkg/errors" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/github.com/stretchr/testify" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/vendor/github.com/orbs-network/orbs-client-sdk-go/vendor/golang.org/x/crypto" vcs="Git" />
   </component>
 </project>
