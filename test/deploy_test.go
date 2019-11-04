@@ -64,7 +64,7 @@ func TestDeployOfAlreadyDeployed(t *testing.T) {
 	t.Log(out)
 	require.NoError(t, err, "deploy should succeed")
 	require.True(t, strings.Contains(out, `"ExecutionResult": "ERROR_SMART_CONTRACT"`))
-	require.True(t, strings.Contains(out, `contract already deployed`))
+	require.True(t, strings.Contains(out, `a contract with same name (case insensitive) already exists`))
 }
 
 func TestRunMethodWithoutDeploy(t *testing.T) {
