@@ -34,12 +34,25 @@ func commandStartLocal(requiredOptions []string) {
 
 func commandStopLocal(requiredOptions []string) {
 	commandStopLocalContainer(gammaHandlerOptions(), requiredOptions)
-	commandStopLocalContainer(prismHandlerOptions(), requiredOptions)
+
+	if prismEnabled() {
+		commandStopLocalContainer(prismHandlerOptions(), requiredOptions)
+	}
 }
 
 func commandUpgrade(requiredOptions []string) {
-	commandUpgradeImage(gammaHandlerOptions(), requiredOptions)
-	commandUpgradeImage(prismHandlerOptions(), requiredOptions)
+	gammaUpgraded := commandUpgradeImage(gammaHandlerOptions(), requiredOptions)
+	prismUpgraded := commandUpgradeImage(prismHandlerOptions(), requiredOptions)
+	if (gammaUpgraded || prismUpgraded) &&
+		isDockerContainerRunning(gammaHandlerOptions().containerName) {
+		if !isDockerContainerRunning(prismHandlerOptions().containerName) {
+			noPrism := true
+			flagNoUi = &noPrism
+		}
+
+		commandStopLocal(requiredOptions)
+		commandStartLocal(requiredOptions)
+	}
 }
 
 func commandStartLocalContainer(dockerOptions handlerOptions, requiredOptions []string) {
@@ -131,20 +144,22 @@ func commandStopLocalContainer(dockerOptions handlerOptions, requiredOptions []s
 `, dockerOptions.name)
 }
 
-func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string) {
+func commandUpgradeImage(dockerOptions handlerOptions, requiredOptions []string) bool {
 	currentTag := verifyDockerInstalled(dockerOptions, dockerOptions.dockerRegistryTagsUrl)
 	latestTag := getLatestDockerTag(dockerOptions.dockerRegistryTagsUrl)
 
 	if !isExperimental() && cmpTags(latestTag, currentTag) <= 0 {
 		log("Current %s stable version %s does not require upgrade.", dockerOptions.name, currentTag)
 	} else {
-		log("Downloading latest version %s:\n", latestTag)
+		log("Downloading latest %s version %s:\n", dockerOptions.name, latestTag)
 		cmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", dockerOptions.dockerRepo, latestTag))
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		cmd.Run()
-		log("")
+		output, _ := cmd.CombinedOutput()
+		log(string(output))
+		if !strings.Contains(string(output), "Image is up to date") {
+			return true
+		}
 	}
+	return false
 }
 
 func showLogs(requiredOptions []string) {
