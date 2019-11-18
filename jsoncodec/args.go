@@ -27,7 +27,7 @@ func isArgsInputStructureValid(args []*Arg) error {
 	for i, arg := range args {
 		rValue := reflect.TypeOf(arg.Value).String()
 		if strings.HasSuffix(arg.Type, "Array") {
-			if reflect.TypeOf(arg).Kind() == reflect.Slice && reflect.TypeOf(arg).Elem().Kind() == reflect.String {
+			if rValue != "[]interface {}" {
 				return errors.Errorf("Argument %d's Type is marked as an Array and it's Value should contain an array of string\nCurrently %s\n", i+1, rValue)
 			}
 		} else if rValue != "string" {

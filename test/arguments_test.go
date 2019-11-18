@@ -23,7 +23,7 @@ func Test_Arguments(t *testing.T) {
 	require.True(t, strings.Contains(outputString, `"ExecutionResult": "SUCCESS"`))
 
 	outputString, err = cli.Run("run-query", "arguments-get.json")
-	t.Log(outputString)
+	// t.Log(outputString) // uncomment to view output if something change
 	require.NoError(t, err, "get should succeed")
 	require.True(t, strings.Contains(outputString, `"ExecutionResult": "SUCCESS"`))
 	outputGetParsed := struct {
@@ -33,13 +33,11 @@ func Test_Arguments(t *testing.T) {
 		}
 	}{}
 	err = json.Unmarshal([]byte(outputString), &outputGetParsed)
-	if err != nil {
-		t.Log(err)
-	}
+	require.NoError(t, err, "parse should succeed")
 	require.Len(t, outputGetParsed.OutputArguments, 8, "There should be 8 output arrays")
 
 	outputString, err = cli.Run("run-query", "arguments-check.json")
-	t.Log(outputString)
+	// t.Log(outputString) // uncomment to view output if something change
 	require.NoError(t, err, "check should succeed")
 	require.True(t, strings.Contains(outputString, `"ExecutionResult": "SUCCESS"`))
 	outputCheckParsed := struct {
@@ -49,9 +47,7 @@ func Test_Arguments(t *testing.T) {
 		}
 	}{}
 	err = json.Unmarshal([]byte(outputString), &outputCheckParsed)
-	if err != nil {
-		t.Log(err)
-	}
+	require.NoError(t, err, "parse should succeed")
 	require.Len(t, outputCheckParsed.OutputArguments, 2, "There should be 2 output values")
 	require.Equal(t, "bool", outputCheckParsed.OutputArguments[0].Type)
 	require.Equal(t, "1", outputCheckParsed.OutputArguments[0].Value)

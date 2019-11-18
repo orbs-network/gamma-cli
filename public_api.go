@@ -288,10 +288,9 @@ func overrideArgWithPossibleArray(arg *jsoncodec.Arg, value string) {
 		var valueAsArray []interface{}
 		err := json.Unmarshal([]byte(value), &valueAsArray)
 		if err != nil {
-			arg.Value = []interface{}{value}
-		} else {
-			arg.Value = valueAsArray
+			die(fmt.Sprintf("Input is marked as %s but was not set as array of strings\n", arg.Type))
 		}
+		arg.Value = valueAsArray
 	} else {
 		arg.Value = value
 	}
