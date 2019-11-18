@@ -257,10 +257,7 @@ func MarshalArgs(arguments []interface{}) ([]*Arg, error) {
 				}
 				res = append(res, &Arg{"uint64Array", arrArguments})
 			case []string:
-				for _, v := range arg {
-					arrArguments = append(arrArguments, v)
-				}
-				res = append(res, &Arg{"stringArray", arrArguments})
+				res = append(res, &Arg{"stringArray", arg})
 			case [][]byte:
 				for _, v := range arg {
 					arrArguments = append(arrArguments, "0x"+hex.EncodeToString(v))
