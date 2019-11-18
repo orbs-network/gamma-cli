@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestArgumentsUnMarshalingTypes(t *testing.T) {
+func TestArgumentsUnMarshalingTypes_InputCorrectlyStructured(t *testing.T) {
 	expectedBigInt := big.NewInt(0)
 	expectedBigInt.SetBytes([]byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff})
 
@@ -29,7 +29,7 @@ func TestArgumentsUnMarshalingTypes(t *testing.T) {
 		{"string", false, &Arg{"string", "hello my name is ?"}, "hello my name is ?"},
 		{"bytes", false, &Arg{"bytes", "ffee00eeff"}, []byte{0xff, 0xee, 0x00, 0xee, 0xff}},
 		{"bytes-fail", true, &Arg{"bytes", "yyyy"}, []byte{}},
-		{"bool-true", false, &Arg{"bool", "1"}, true},
+		{"bytes", false, &Arg{"bytes", "ffee00eeff"}, []byte{0xff, 0xee, 0x00, 0xee, 0xff}},
 		{"bool-false", false, &Arg{"bool", "0"}, false},
 		{"bool-fail", true, &Arg{"bool", "2"}, false},
 		{"bytes20", false, &Arg{"bytes20", "0011223344556677889900112233445566778899"}, [20]byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99}},
@@ -42,6 +42,16 @@ func TestArgumentsUnMarshalingTypes(t *testing.T) {
 		{"bigint-fail", true, &Arg{"uint256", "yyyy"}, nil},
 		{"bigint-fail-size", true, &Arg{"uint256", "00112233445566778899aabbccddeeff001122334455667788"}, nil},
 		{"unknown type string", true, &Arg{"uint8", "19480514"}, uint32(0)},
+		// not checking internal translation of single array value as it is done by same function internally
+		{"uint32Array", false, &Arg{"uint32Array", []interface{}{"19480514", "1"}}, []uint32{uint32(19480514), uint32(1)}},
+		{"uint64Array", false, &Arg{"uint64Array", []interface{}{"19480514000000000", "1"}}, []uint64{uint64(19480514000000000), uint64(1)}},
+		{"stringArray", false, &Arg{"stringArray", []interface{}{"hello my name is ?", "what?", "who"}}, []string{"hello my name is ?", "what?", "who"}},
+		{"bytesArray", false, &Arg{"bytesArray", []interface{}{"ffee00eeff", "00001122"}}, [][]byte{{0xff, 0xee, 0x00, 0xee, 0xff}, {0x00, 0x00, 0x11, 0x22}}},
+		{"boolArray", false, &Arg{"boolArray", []interface{}{"0", "1", "1", "1"}}, []bool{false, true, true, true}},
+		{"bytes20Array", false, &Arg{"bytes20Array", []interface{}{"0011223344556677889900112233445566778899"}}, [][20]byte{{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99}}},
+		{"bytes32Array", false, &Arg{"bytes32Array", []interface{}{"00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"}}, [][32]byte{{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}}},
+		{"bigintArray", false, &Arg{"uint256Array", []interface{}{"00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"}}, []*big.Int{expectedBigInt}},
+		{"unknown type Array", true, &Arg{"uint8Array", []interface{}{"19480514"}}, uint32(0)},
 	}
 
 	for _, cTest := range tests {
@@ -55,6 +65,25 @@ func TestArgumentsUnMarshalingTypes(t *testing.T) {
 			require.NoError(t, err, "unmarshal %s should not fail", cTest.name)
 			require.EqualValues(t, nativeList, resNativeList)
 		}
+	}
+}
+
+func TestArgumentsUnMarshalingTypes_IncorrectInputStructure(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  *Arg
+	}{
+		{"non-array-type with array-input", &Arg{"uint32", []string{"19480514"}}},
+		{"array-type with non-array-input", &Arg{"uint32Array", "19480514"}},
+		{"non-array-input is not string", &Arg{"uint64", 19480514000000000}},
+		{"array input is not string array", &Arg{"uint64Array", []uint32{10, 20}}},
+	}
+
+	for _, cTest := range tests {
+		argList := []*Arg{cTest.arg}
+
+		_, err := UnmarshalArgs(argList, func(string) *RawKey { return nil })
+		require.Error(t, err, "unmarshal %s should fail", cTest.name)
 	}
 }
 
@@ -76,6 +105,14 @@ func TestArgumentsMarshaling_GoodFlow(t *testing.T) {
 		{"bytes20", &Arg{"bytes20", "0x0011223344556677889900112233445566778899"}, [20]byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99}},
 		{"bytes32", &Arg{"bytes32", "0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"}, [32]byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}},
 		{"bigint", &Arg{"uint256", "0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"}, aBigInt},
+		{"uint32Array", &Arg{"uint32Array", []string{"19480514", "1"}}, []uint32{19480514, 1}},
+		{"uint64Array", &Arg{"uint64Array", []string{"19480514000000000", "1"}}, []uint64{19480514000000000, 1}},
+		{"stringArray", &Arg{"stringArray", []string{"hello", "my", "name"}}, []string{"hello", "my", "name"}},
+		{"bytesArray", &Arg{"bytesArray", []string{"0xffee00eeff", "0xffee00eeff"}}, [][]byte{{0xff, 0xee, 0x00, 0xee, 0xff}, {0xff, 0xee, 0x00, 0xee, 0xff}}},
+		{"boolArray", &Arg{"boolArray", []string{"1", "1", "0"}}, []bool{true, true, false}},
+		{"uint256Array", &Arg{"uint256Array", []string{"0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"}}, []*big.Int{aBigInt}},
+		{"bytes20Array", &Arg{"bytes20Array", []string{"0x0011223344556677889900112233445566778899", "0xaa112233445566778899001122334455667788ff"}}, [][20]byte{{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99}, {0xaa, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0xff}}},
+		{"bytes32Array", &Arg{"bytes32Array", []string{"0x00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff", "0xaa112233445566778899aabbccddeeff00112233445566778899aabbccddee11"}}, [][32]byte{{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}, {0xaa, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0x11}}},
 	}
 
 	for _, cTest := range tests {

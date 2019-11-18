@@ -7,6 +7,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/orbs-network/gamma-cli/jsoncodec"
 	"github.com/orbs-network/orbs-client-sdk-go/codec"
@@ -282,32 +283,46 @@ func getFilenameWithoutExtension(filename string) string {
 	return strings.Split(path.Base(filename), ".")[0]
 }
 
+func overrideArgWithPossibleArray(arg *jsoncodec.Arg, value string) {
+	if strings.HasSuffix(arg.Type, "Array") {
+		var valueAsArray []interface{}
+		err := json.Unmarshal([]byte(value), &valueAsArray)
+		if err != nil {
+			arg.Value = []interface{}{value}
+		} else {
+			arg.Value = valueAsArray
+		}
+	} else {
+		arg.Value = value
+	}
+}
+
 func overrideArgsWithFlags(args []*jsoncodec.Arg) {
 	if *flagArg1 != "" {
-		args[0].Value = *flagArg1
+		overrideArgWithPossibleArray(args[0], *flagArg1)
 	}
 	if *flagArg2 != "" {
-		args[1].Value = *flagArg2
+		overrideArgWithPossibleArray(args[1], *flagArg2)
 	}
 	if *flagArg3 != "" {
-		args[2].Value = *flagArg3
+		overrideArgWithPossibleArray(args[2], *flagArg3)
 	}
 	if *flagArg4 != "" {
-		args[3].Value = *flagArg4
+		overrideArgWithPossibleArray(args[3], *flagArg4)
 	}
 	if *flagArg5 != "" {
-		args[4].Value = *flagArg5
+		overrideArgWithPossibleArray(args[4], *flagArg5)
 	}
 	if *flagArg6 != "" {
-		args[5].Value = *flagArg6
+		overrideArgWithPossibleArray(args[5], *flagArg6)
 	}
 	if *flagArg7 != "" {
-		args[6].Value = *flagArg7
+		overrideArgWithPossibleArray(args[6], *flagArg7)
 	}
 	if *flagArg8 != "" {
-		args[7].Value = *flagArg8
+		overrideArgWithPossibleArray(args[7], *flagArg8)
 	}
 	if *flagArg9 != "" {
-		args[8].Value = *flagArg9
+		overrideArgWithPossibleArray(args[8], *flagArg9)
 	}
 }
