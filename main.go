@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const GAMMA_CLI_VERSION = "0.9.0"
+const GAMMA_CLI_VERSION = "0.10.0"
 const CONFIG_FILENAME = "orbs-gamma-config.json"
 const TEST_KEYS_FILENAME = "orbs-test-keys.json"
 const LOCAL_ENV_ID = "local"
@@ -22,24 +22,24 @@ const EXPERIMENTAL_ENV_ID = "experimental"
 type handlerOptions struct {
 	name string
 
-	dockerRepo string
-	dockerCmd []string
-	containerName string
+	dockerRepo            string
+	dockerCmd             []string
+	containerName         string
 	dockerRegistryTagsUrl string
 
 	env []string
 
-	port int
+	port          int
 	containerPort int
 }
 
 type handler func([]string)
 
 type command struct {
-	desc            string
-	args            string
-	example         string
-	example2        string
+	desc     string
+	args     string
+	example  string
+	example2 string
 	handler
 	sort            int
 	requiredOptions []string
@@ -47,24 +47,24 @@ type command struct {
 
 func gammaHandlerOptions() handlerOptions {
 	return handlerOptions{
-		name: "Orbs Gamma personal blockchain",
+		name:                  "Orbs Gamma personal blockchain",
 		dockerRepo:            "orbsnetwork/gamma",
-		dockerCmd: []string{"./gamma-server", "-override-config", *flagOverrideConfig},
+		dockerCmd:             []string{"./gamma-server", "-override-config", *flagOverrideConfig},
 		containerName:         "orbs-gamma-server",
 		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/gamma/tags/",
-		port: *flagPort,
-		containerPort: 8080,
+		port:                  *flagPort,
+		containerPort:         8080,
 	}
 }
 
 func prismHandlerOptions() handlerOptions {
 	return handlerOptions{
-		name: "Prism blockchain explorer",
+		name:                  "Prism blockchain explorer",
 		dockerRepo:            "orbsnetwork/prism",
 		containerName:         "orbs-prism",
 		dockerRegistryTagsUrl: "https://registry.hub.docker.com/v2/repositories/orbsnetwork/prism/tags/",
-		port: *flagPrismPort,
-		containerPort: 3000,
+		port:                  *flagPrismPort,
+		containerPort:         3000,
 		env: []string{
 			"ORBS_VIRTUAL_CHAIN_ID=42",
 			"NODE_ENV=staging",
@@ -150,10 +150,10 @@ var commands = map[string]*command{
 		requiredOptions: nil,
 	},
 	"logs": {
-		desc: "streams logs from gamma that are printed by smart contract to stdout (i.e. println())",
-		handler: showLogs,
-		sort: 9,
-		example: "gamma-cli logs",
+		desc:            "streams logs from gamma that are printed by smart contract to stdout (i.e. println())",
+		handler:         showLogs,
+		sort:            9,
+		example:         "gamma-cli logs",
 		requiredOptions: nil,
 	},
 	"version": {
@@ -170,15 +170,15 @@ var commands = map[string]*command{
 }
 
 var (
-	flagPort         = flag.Int("port", 8080, "listening port for Gamma server")
-	flagPrismPort    = flag.Int("prismPort", 3000, "listening port for Prism blockchain explorer")
-	flagSigner       = flag.String("signer", "user1", "id of the signing key from the test key json")
-	flagContractName = flag.String("name", "", "name of the smart contract being deployed")
-	flagKeyFile      = flag.String("keys", TEST_KEYS_FILENAME, "name of the json file containing test keys")
-	flagConfigFile   = flag.String("config", CONFIG_FILENAME, "path to config file")
-	flagEnv          = flag.String("env", LOCAL_ENV_ID, "environment from config file containing server connection details")
-	flagWait         = flag.Bool("wait", false, "wait until Gamma server is ready and listening")
-	flagNoUi         = flag.Bool("no-ui", false, "do not start Prism blockchain explorer")
+	flagPort           = flag.Int("port", 8080, "listening port for Gamma server")
+	flagPrismPort      = flag.Int("prismPort", 3000, "listening port for Prism blockchain explorer")
+	flagSigner         = flag.String("signer", "user1", "id of the signing key from the test key json")
+	flagContractName   = flag.String("name", "", "name of the smart contract being deployed")
+	flagKeyFile        = flag.String("keys", TEST_KEYS_FILENAME, "name of the json file containing test keys")
+	flagConfigFile     = flag.String("config", CONFIG_FILENAME, "path to config file")
+	flagEnv            = flag.String("env", LOCAL_ENV_ID, "environment from config file containing server connection details")
+	flagWait           = flag.Bool("wait", false, "wait until Gamma server is ready and listening")
+	flagNoUi           = flag.Bool("no-ui", false, "do not start Prism blockchain explorer")
 	flagOverrideConfig = flag.String("override-config", "{}", "option json for overriding config values, same format as file-based config")
 
 	// args (hidden from help)
