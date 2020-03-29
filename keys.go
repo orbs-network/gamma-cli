@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/orbs-network/orbs-client-sdk-go/crypto/encoding"
+	"github.com/orbs-network/crypto-lib-go/crypto/encoding"
 	"github.com/orbs-network/gamma-cli/jsoncodec"
 	"github.com/orbs-network/orbs-client-sdk-go/orbs"
 	"io/ioutil"
