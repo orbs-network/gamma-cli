@@ -8,7 +8,7 @@ package jsoncodec
 
 import (
 	"encoding/hex"
-	"github.com/orbs-network/orbs-client-sdk-go/crypto/encoding"
+	"github.com/orbs-network/crypto-lib-go/crypto/encoding"
 	"github.com/pkg/errors"
 	"math/big"
 	"reflect"
