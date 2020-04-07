@@ -202,6 +202,29 @@ See https://orbs.gitbook.io for more info.
     docker logs -f orbs-gamma-server
     ```
 
+## Working with Gamma server using client SDK
+
+Instead of deploying contracts and sending transactions using `gamma-cli`, you can also use any of the client SDKs (like [JavaScript Client SDK](https://github.com/orbs-network/orbs-client-sdk-javascript), [Go Client SDK](https://github.com/orbs-network/orbs-client-sdk-go)) to communicate with Gamma server.
+
+Start Gamma server on some port (eg. 8080), and then use the following endpoint in the client SDK:
+
+   ```
+   http://localhost:8080
+   VIRTUAL_CHAIN_ID = 42
+   ```
+
+Provide the client SDK with virtual chain ID of `42` as this is the pre-defined ID of the virtual chain running inside Gamma server. You can usually see a working example in the [E2E test](https://github.com/orbs-network/orbs-client-sdk-javascript/blob/master/e2e/nodejs/e2e.test.js) of each client SDK.
+
+## Installing Gamma Docker image directly
+
+Instead of installing Gamma server using `gamma-cli`, you can also install Gamma server directly from [Docker Hub](https://hub.docker.com/r/orbsnetwork/gamma/tags). This is particularly useful when running on CI:
+
+   ```
+   docker pull orbsnetwork/gamma:v1.3.12       # specific version
+   docker pull orbsnetwork/gamma               # latest stable version
+   docker pull orbsnetwork/gamma:experimental  # latest experimental version
+   ```
+
 &nbsp;
 
 ## License
