@@ -3,25 +3,25 @@ rm -rf ./_bin
 
 mkdir -p ./_bin
 
-VERSION="v0.11.0"
+VERSION="v0.11.1"
 
 echo "\n\n*** MAC:"
-GOOS=darwin GOARCH=amd64 go build -o _bin/gamma-cli
+GOOS=darwin GOARCH=amd64 go build -ldflags "-w -extldflags '-static' -X main.GAMMA_CLI_VERSION=$VERSION" -tags "usergo netgo" -o _bin/gamma-cli
 tar -zcvf ./_bin/gammacli-mac-$VERSION.tar.gz ./_bin/gamma-cli
 rm ./_bin/gamma-cli
 
 echo "\n\n*** LINUX (x86-64):"
-GOOS=linux GOARCH=amd64 go build -o _bin/gamma-cli
+GOOS=linux GOARCH=amd64 go build -ldflags "-w -extldflags '-static' -X main.GAMMA_CLI_VERSION=$VERSION" -tags "usergo netgo" -o _bin/gamma-cli
 tar -zcvf ./_bin/gammacli-linux-x86-64-$VERSION.tar.gz ./_bin/gamma-cli
 rm ./_bin/gamma-cli
 
 echo "\n\n*** LINUX (i386):"
-GOOS=linux GOARCH=386 go build -o _bin/gamma-cli
+GOOS=linux GOARCH=386 go build -ldflags "-w -extldflags '-static' -X main.GAMMA_CLI_VERSION=$VERSION" -tags "usergo netgo" -o _bin/gamma-cli
 tar -zcvf ./_bin/gammacli-linux-i386-$VERSION.tar.gz ./_bin/gamma-cli
 rm ./_bin/gamma-cli
 
 echo "\n\n*** WINDOWS:"
-GOOS=windows GOARCH=386 go build -o _bin/gamma-cli.exe
+GOOS=windows GOARCH=386 go build -ldflags "-w -extldflags '-static' -X main.GAMMA_CLI_VERSION=$VERSION" -tags "usergo netgo" -o _bin/gamma-cli.exe
 zip -r ./_bin/gammacli-windows-$VERSION.zip ./_bin/gamma-cli.exe
 rm ./_bin/gamma-cli.exe
 
